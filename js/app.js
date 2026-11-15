@@ -21,6 +21,9 @@
 
   const uid = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`;
 
+  // Безопасный доступ к элементам (возвращает null если нет)
+  const el = (id) => document.getElementById(id);
+
   // ================= СОСТОЯНИЕ =================
   let db = loadDb();
   let view = "devices";
@@ -82,12 +85,9 @@
   const compatibleCoils = (d) => (d.coils || []).map(coilById).filter(Boolean);
   const compatibleDevices = (c) => db.devices.filter((d) => (d.coils || []).includes(c.id));
 
-  // Превращает относительный путь images/... в полный URL GitHub
   function toFullUrl(src) {
     if (!src) return "";
-    // Если уже полный URL — возвращаем как есть
     if (src.startsWith("http://") || src.startsWith("https://")) return src;
-    // Если относительный путь — подставляем GitHub
     if (src.startsWith("images/")) {
       return "https://raw.githubusercontent.com/ilushka28/VH_Learning/main/" + src;
     }
@@ -106,6 +106,7 @@
   }
 
   function setPreview(img, src) {
+    if (!img) return;
     if (!src) {
       img.removeAttribute("src");
       img.hidden = true;
@@ -125,32 +126,42 @@
       document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
       document.querySelectorAll(".page").forEach((p) => { p.classList.remove("active"); p.hidden = true; });
       btn.classList.add("active");
-      const page = $(btn.dataset.tab);
-      page.hidden = false;
-      page.classList.add("active");
+      const page = el(btn.dataset.tab);
+      if (page) {
+        page.hidden = false;
+        page.classList.add("active");
+      }
     });
   });
 
   // ================= КАТАЛОГ =================
-  $("searchInput").addEventListener("input", renderCatalog);
-  $("brandFilter").addEventListener("change", () => {
-    currentBrand = $("brandFilter").value;
+  const searchInput = el("searchInput");
+  const brandFilter = el("brandFilter");
+  const viewDevices = el("viewDevices");
+  const viewCoils = el("viewCoils");
+  const catalogStats = el("catalogStats");
+  const catalogGrid = el("catalogGrid");
+
+  if (searchInput) searchInput.addEventListener("input", renderCatalog);
+  if (brandFilter) brandFilter.addEventListener("change", () => {
+    currentBrand = brandFilter.value;
     renderCatalog();
   });
-  $("viewDevices").addEventListener("click", () => {
+  if (viewDevices) viewDevices.addEventListener("click", () => {
     view = "devices";
-    $("viewDevices").classList.add("active");
-    $("viewCoils").classList.remove("active");
+    viewDevices.classList.add("active");
+    viewCoils?.classList.remove("active");
     renderCatalog();
   });
-  $("viewCoils").addEventListener("click", () => {
+  if (viewCoils) viewCoils.addEventListener("click", () => {
     view = "coils";
-    $("viewCoils").classList.add("active");
-    $("viewDevices").classList.remove("active");
+    viewCoils.classList.add("active");
+    viewDevices?.classList.remove("active");
     renderCatalog();
   });
 
   function renderBrandFilter() {
+    if (!brandFilter) return;
     const brands = ["Все", ...new Set([
       ...db.devices.map((d) => d.brand),
       ...db.coils.map((c) => c.brand)
@@ -159,13 +170,14 @@
       if (b === "Все") return 1;
       return a.localeCompare(b);
     });
-    $("brandFilter").innerHTML = brands.map((b) => `<option value="${esc(b)}">${esc(b)}</option>`).join("");
-    $("brandFilter").value = brands.includes(currentBrand) ? currentBrand : "Все";
-    currentBrand = $("brandFilter").value;
+    brandFilter.innerHTML = brands.map((b) => `<option value="${esc(b)}">${esc(b)}</option>`).join("");
+    brandFilter.value = brands.includes(currentBrand) ? currentBrand : "Все";
+    currentBrand = brandFilter.value;
   }
 
   function renderCatalog() {
-    const q = $("searchInput").value.trim().toLowerCase();
+    if (!catalogGrid) return;
+    const q = searchInput?.value.trim().toLowerCase() || "";
 
     if (view === "devices") {
       const list = db.devices.filter((d) => {
@@ -174,8 +186,8 @@
         return (currentBrand === "Все" || d.brand === currentBrand) && (!q || text.includes(q));
       }).sort((a, b) => Number(b.popular) - Number(a.popular));
 
-      $("catalogStats").textContent = `Устройств: ${list.length} из ${db.devices.length}`;
-      $("catalogGrid").innerHTML = list.map(deviceCard).join("") || `<div class="empty">Ничего не найдено</div>`;
+      if (catalogStats) catalogStats.textContent = `Устройств: ${list.length} из ${db.devices.length}`;
+      catalogGrid.innerHTML = list.map(deviceCard).join("") || `<div class="empty">Ничего не найдено</div>`;
     } else {
       const list = db.coils.filter((c) => {
         const devicesText = compatibleDevices(c).map(deviceLabel).join(" ");
@@ -183,8 +195,8 @@
         return (currentBrand === "Все" || c.brand === currentBrand) && (!q || text.includes(q));
       });
 
-      $("catalogStats").textContent = `Испарителей / картриджей: ${list.length} из ${db.coils.length}`;
-      $("catalogGrid").innerHTML = list.map(coilCard).join("") || `<div class="empty">Ничего не найдено</div>`;
+      if (catalogStats) catalogStats.textContent = `Испарителей / картриджей: ${list.length} из ${db.coils.length}`;
+      catalogGrid.innerHTML = list.map(coilCard).join("") || `<div class="empty">Ничего не найдено</div>`;
     }
   }
 
@@ -241,19 +253,31 @@
     `;
   }
 
-  // ================= АДМИНКА =================
+  // ================= АДМИНКА (только если есть элементы) =================
   function renderAdmin() {
-    $("adminStats").textContent =
-      `В базе: ${db.devices.length} устройств, ${db.coils.length} испарителей. ` +
-      `Обновлено: ${db.meta.updatedAt || "не указано"}`;
+    const adminStats = el("adminStats");
+    const deviceSelect = el("deviceSelect");
+    const coilSelect = el("coilSelect");
 
-    $("deviceSelect").innerHTML =
-      `<option value="">— новое устройство —</option>` +
-      db.devices.map((d) => `<option value="${esc(d.id)}">${esc(deviceLabel(d))}</option>`).join("");
+    if (!deviceSelect && !coilSelect) return; // Админки нет на странице — выходим
 
-    $("coilSelect").innerHTML =
-      `<option value="">— новый испаритель / картридж —</option>` +
-      db.coils.map((c) => `<option value="${esc(c.id)}">${esc(coilLabel(c))}</option>`).join("");
+    if (adminStats) {
+      adminStats.textContent =
+        `В базе: ${db.devices.length} устройств, ${db.coils.length} испарителей. ` +
+        `Обновлено: ${db.meta.updatedAt || "не указано"}`;
+    }
+
+    if (deviceSelect) {
+      deviceSelect.innerHTML =
+        `<option value="">— новое устройство —</option>` +
+        db.devices.map((d) => `<option value="${esc(d.id)}">${esc(deviceLabel(d))}</option>`).join("");
+    }
+
+    if (coilSelect) {
+      coilSelect.innerHTML =
+        `<option value="">— новый испаритель / картридж —</option>` +
+        db.coils.map((c) => `<option value="${esc(c.id)}">${esc(coilLabel(c))}</option>`).join("");
+    }
 
     renderCompatChecks([]);
     clearDeviceForm(false);
@@ -261,13 +285,16 @@
   }
 
   function renderCompatChecks(selected = [], filter = "") {
+    const compatChecks = el("compatChecks");
+    if (!compatChecks) return;
+
     const f = filter.toLowerCase();
     const list = db.coils.filter((c) => {
       if (!f) return true;
       return `${c.brand} ${c.name} ${c.resistance}`.toLowerCase().includes(f);
     });
 
-    $("compatChecks").innerHTML = list.length
+    compatChecks.innerHTML = list.length
       ? list.map((c) => `
           <label>
             <input type="checkbox" value="${esc(c.id)}" ${selected.includes(c.id) ? "checked" : ""}>
@@ -278,195 +305,253 @@
       : `<div class="muted">Картриджи не найдены. ${db.coils.length ? "Попробуй другой запрос." : "Сначала добавь картриджи."}</div>`;
   }
 
-  $("coilSearch").addEventListener("input", () => {
-    const selected = [...$("compatChecks").querySelectorAll("input:checked")].map((i) => i.value);
-    renderCompatChecks(selected, $("coilSearch").value);
-  });
+  const coilSearch = el("coilSearch");
+  if (coilSearch) {
+    coilSearch.addEventListener("input", () => {
+      const selected = [...el("compatChecks").querySelectorAll("input:checked")].map((i) => i.value);
+      renderCompatChecks(selected, coilSearch.value);
+    });
+  }
 
   // --- Форма устройства ---
-  $("deviceSelect").addEventListener("change", () => {
-    const id = $("deviceSelect").value;
-    if (!id) return clearDeviceForm(false);
-    const d = deviceById(id);
-    if (!d) return;
+  const deviceSelect = el("deviceSelect");
+  if (deviceSelect) {
+    deviceSelect.addEventListener("change", () => {
+      const id = deviceSelect.value;
+      if (!id) return clearDeviceForm(false);
+      const d = deviceById(id);
+      if (!d) return;
 
-    $("dBrand").value = d.brand;
-    $("dModel").value = d.model;
-    $("dType").value = d.type;
-    $("dPrice").value = d.price || "";
-    $("dDescription").value = d.description || "";
-    $("dPopular").checked = Boolean(d.popular);
-    $("dImagePath").value = d.image || "";
-    setPreview($("dPreview"), d.image);
-    $("coilSearch").value = "";
-    renderCompatChecks(d.coils || []);
-  });
+      el("dBrand").value = d.brand;
+      el("dModel").value = d.model;
+      el("dType").value = d.type;
+      el("dPrice").value = d.price || "";
+      el("dDescription").value = d.description || "";
+      el("dPopular").checked = Boolean(d.popular);
+      el("dImagePath").value = d.image || "";
+      setPreview(el("dPreview"), d.image);
+      if (coilSearch) coilSearch.value = "";
+      renderCompatChecks(d.coils || []);
+    });
+  }
 
-  $("dImagePath").addEventListener("input", () => {
-    setPreview($("dPreview"), $("dImagePath").value.trim());
-  });
+  const dImagePath = el("dImagePath");
+  if (dImagePath) {
+    dImagePath.addEventListener("input", () => {
+      setPreview(el("dPreview"), dImagePath.value.trim());
+    });
+  }
 
-  $("deviceForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const id = $("deviceSelect").value || uid("dev");
-    const selectedCoils = [...$("compatChecks").querySelectorAll("input:checked")].map((i) => i.value);
+  const deviceForm = el("deviceForm");
+  if (deviceForm) {
+    deviceForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = deviceSelect?.value || uid("dev");
+      const compatChecks = el("compatChecks");
+      const selectedCoils = compatChecks
+        ? [...compatChecks.querySelectorAll("input:checked")].map((i) => i.value)
+        : [];
 
-    const item = {
-      id,
-      brand: $("dBrand").value.trim(),
-      model: $("dModel").value.trim(),
-      type: $("dType").value.trim() || "POD",
-      price: Number($("dPrice").value || 0),
-      description: $("dDescription").value.trim(),
-      popular: $("dPopular").checked,
-      image: $("dImagePath").value.trim(),
-      coils: selectedCoils
-    };
+      const item = {
+        id,
+        brand: el("dBrand").value.trim(),
+        model: el("dModel").value.trim(),
+        type: el("dType").value.trim() || "POD",
+        price: Number(el("dPrice").value || 0),
+        description: el("dDescription").value.trim(),
+        popular: el("dPopular").checked,
+        image: el("dImagePath").value.trim(),
+        coils: selectedCoils
+      };
 
-    const idx = db.devices.findIndex((d) => d.id === id);
-    if (idx >= 0) db.devices[idx] = item;
-    else db.devices.push(item);
+      const idx = db.devices.findIndex((d) => d.id === id);
+      if (idx >= 0) db.devices[idx] = item;
+      else db.devices.push(item);
 
-    saveDb();
-    renderAll();
-    $("deviceSelect").value = id;
-    $("deviceSelect").dispatchEvent(new Event("change"));
-  });
+      saveDb();
+      renderAll();
+      if (deviceSelect) {
+        deviceSelect.value = id;
+        deviceSelect.dispatchEvent(new Event("change"));
+      }
+    });
+  }
 
-  $("newDevice").addEventListener("click", () => clearDeviceForm(true));
-  $("deleteDevice").addEventListener("click", () => {
-    const id = $("deviceSelect").value;
-    if (!id) return alert("Выбери устройство для удаления.");
-    if (!confirm("Удалить устройство?")) return;
-    db.devices = db.devices.filter((d) => d.id !== id);
-    saveDb();
-    renderAll();
-  });
+  const newDevice = el("newDevice");
+  if (newDevice) newDevice.addEventListener("click", () => clearDeviceForm(true));
+
+  const deleteDevice = el("deleteDevice");
+  if (deleteDevice) {
+    deleteDevice.addEventListener("click", () => {
+      const id = deviceSelect?.value;
+      if (!id) return alert("Выбери устройство для удаления.");
+      if (!confirm("Удалить устройство?")) return;
+      db.devices = db.devices.filter((d) => d.id !== id);
+      saveDb();
+      renderAll();
+    });
+  }
 
   function clearDeviceForm(resetSelect = true) {
-    if (resetSelect) $("deviceSelect").value = "";
-    $("deviceForm").reset();
-    $("dPreview").hidden = true;
-    $("coilSearch").value = "";
+    if (resetSelect && deviceSelect) deviceSelect.value = "";
+    const form = el("deviceForm");
+    if (form) form.reset();
+    const preview = el("dPreview");
+    if (preview) preview.hidden = true;
+    if (coilSearch) coilSearch.value = "";
     renderCompatChecks([]);
   }
 
   // --- Форма испарителя ---
-  $("coilSelect").addEventListener("change", () => {
-    const id = $("coilSelect").value;
-    if (!id) return clearCoilForm(false);
-    const c = coilById(id);
-    if (!c) return;
+  const coilSelect = el("coilSelect");
+  if (coilSelect) {
+    coilSelect.addEventListener("change", () => {
+      const id = coilSelect.value;
+      if (!id) return clearCoilForm(false);
+      const c = coilById(id);
+      if (!c) return;
 
-    $("cBrand").value = c.brand;
-    $("cName").value = c.name;
-    $("cResistance").value = c.resistance;
-    $("cType").value = c.type;
-    $("cPrice").value = c.price || "";
-    $("cDescription").value = c.description || "";
-    $("cImagePath").value = c.image || "";
-    setPreview($("cPreview"), c.image);
-  });
+      el("cBrand").value = c.brand;
+      el("cName").value = c.name;
+      el("cResistance").value = c.resistance;
+      el("cType").value = c.type;
+      el("cPrice").value = c.price || "";
+      el("cDescription").value = c.description || "";
+      el("cImagePath").value = c.image || "";
+      setPreview(el("cPreview"), c.image);
+    });
+  }
 
-  $("cImagePath").addEventListener("input", () => {
-    setPreview($("cPreview"), $("cImagePath").value.trim());
-  });
+  const cImagePath = el("cImagePath");
+  if (cImagePath) {
+    cImagePath.addEventListener("input", () => {
+      setPreview(el("cPreview"), cImagePath.value.trim());
+    });
+  }
 
-  $("coilForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const id = $("coilSelect").value || uid("coil");
+  const coilForm = el("coilForm");
+  if (coilForm) {
+    coilForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = coilSelect?.value || uid("coil");
 
-    const item = {
-      id,
-      brand: $("cBrand").value.trim(),
-      name: $("cName").value.trim(),
-      resistance: $("cResistance").value.trim(),
-      type: $("cType").value.trim() || "картридж",
-      price: Number($("cPrice").value || 0),
-      description: $("cDescription").value.trim(),
-      image: $("cImagePath").value.trim()
-    };
+      const item = {
+        id,
+        brand: el("cBrand").value.trim(),
+        name: el("cName").value.trim(),
+        resistance: el("cResistance").value.trim(),
+        type: el("cType").value.trim() || "картридж",
+        price: Number(el("cPrice").value || 0),
+        description: el("cDescription").value.trim(),
+        image: el("cImagePath").value.trim()
+      };
 
-    const idx = db.coils.findIndex((c) => c.id === id);
-    if (idx >= 0) db.coils[idx] = item;
-    else db.coils.push(item);
+      const idx = db.coils.findIndex((c) => c.id === id);
+      if (idx >= 0) db.coils[idx] = item;
+      else db.coils.push(item);
 
-    saveDb();
-    renderAll();
-    $("coilSelect").value = id;
-    $("coilSelect").dispatchEvent(new Event("change"));
-  });
+      saveDb();
+      renderAll();
+      if (coilSelect) {
+        coilSelect.value = id;
+        coilSelect.dispatchEvent(new Event("change"));
+      }
+    });
+  }
 
-  $("newCoil").addEventListener("click", () => clearCoilForm(true));
-  $("deleteCoil").addEventListener("click", () => {
-    const id = $("coilSelect").value;
-    if (!id) return alert("Выбери испаритель для удаления.");
-    if (!confirm("Удалить испаритель? Он будет убран из совместимости устройств.")) return;
-    db.coils = db.coils.filter((c) => c.id !== id);
-    db.devices.forEach((d) => { d.coils = (d.coils || []).filter((cid) => cid !== id); });
-    saveDb();
-    renderAll();
-  });
+  const newCoil = el("newCoil");
+  if (newCoil) newCoil.addEventListener("click", () => clearCoilForm(true));
+
+  const deleteCoil = el("deleteCoil");
+  if (deleteCoil) {
+    deleteCoil.addEventListener("click", () => {
+      const id = coilSelect?.value;
+      if (!id) return alert("Выбери испаритель для удаления.");
+      if (!confirm("Удалить испаритель? Он будет убран из совместимости устройств.")) return;
+      db.coils = db.coils.filter((c) => c.id !== id);
+      db.devices.forEach((d) => { d.coils = (d.coils || []).filter((cid) => cid !== id); });
+      saveDb();
+      renderAll();
+    });
+  }
 
   function clearCoilForm(resetSelect = true) {
-    if (resetSelect) $("coilSelect").value = "";
-    $("coilForm").reset();
-    $("cPreview").hidden = true;
+    if (resetSelect && coilSelect) coilSelect.value = "";
+    const form = el("coilForm");
+    if (form) form.reset();
+    const preview = el("cPreview");
+    if (preview) preview.hidden = true;
   }
 
   // --- Экспорт / Импорт / Сброс ---
-  $("exportBtn").addEventListener("click", () => {
-    db.meta.updatedAt = new Date().toISOString();
-    const content = `window.CATALOG_DATA = ${JSON.stringify(db, null, 2)};\n`;
-    const blob = new Blob([content], { type: "application/javascript;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "catalog.js";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
+  const exportBtn = el("exportBtn");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => {
+      db.meta.updatedAt = new Date().toISOString();
+      const content = `window.CATALOG_DATA = ${JSON.stringify(db, null, 2)};\n`;
+      const blob = new Blob([content], { type: "application/javascript;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "catalog.js";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
 
-  $("importFile").addEventListener("change", async () => {
-    const file = $("importFile").files[0];
-    if (!file) return;
-    try {
-      const text = await file.text();
-      let parsed;
+  const importFile = el("importFile");
+  if (importFile) {
+    importFile.addEventListener("change", async () => {
+      const file = importFile.files[0];
+      if (!file) return;
       try {
-        parsed = JSON.parse(text);
-      } catch {
-        const start = text.indexOf("=");
-        const end = text.lastIndexOf(";");
-        parsed = JSON.parse(text.slice(start + 1, end));
+        const text = await file.text();
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          const start = text.indexOf("=");
+          const end = text.lastIndexOf(";");
+          parsed = JSON.parse(text.slice(start + 1, end));
+        }
+        db = normalize(parsed);
+        saveDb();
+        renderAll();
+        alert("База импортирована.");
+      } catch (e) {
+        alert("Не удалось импортировать файл. Проверьте формат.");
+        console.error(e);
       }
-      db = normalize(parsed);
-      saveDb();
-      renderAll();
-      alert("База импортирована.");
-    } catch (e) {
-      alert("Не удалось импортировать файл. Проверьте формат.");
-      console.error(e);
-    }
-  });
+    });
+  }
 
-  $("resetBtn").addEventListener("click", () => {
-    if (!confirm("Сбросить локальные изменения и вернуть демо-базу?")) return;
-    localStorage.removeItem(STORAGE_KEY);
-    db = normalize(clone(window.CATALOG_DATA || { devices: [], coils: [] }));
-    renderAll();
-  });
+  const resetBtn = el("resetBtn");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      if (!confirm("Сбросить локальные изменения и вернуть демо-базу?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      db = normalize(clone(window.CATALOG_DATA || { devices: [], coils: [] }));
+      renderAll();
+    });
+  }
 
   // ================= ТРЕНАЖЁР =================
-  $("startQuiz").addEventListener("click", startQuiz);
-  $("clearMistakes").addEventListener("click", () => {
-    localStorage.removeItem(MISTAKES_KEY);
-    renderMistakes();
-  });
+  const startQuiz = el("startQuiz");
+  if (startQuiz) {
+    startQuiz.addEventListener("click", startQuizFn);
+  }
 
-  function startQuiz() {
-    const mode = $("trainMode").value;
-    const count = Number($("trainCount").value);
+  const clearMistakes = el("clearMistakes");
+  if (clearMistakes) {
+    clearMistakes.addEventListener("click", () => {
+      localStorage.removeItem(MISTAKES_KEY);
+      renderMistakes();
+    });
+  }
+
+  function startQuizFn() {
+    const mode = el("trainMode")?.value || "mix";
+    const count = Number(el("trainCount")?.value || 10);
     const questions = [];
     for (let i = 0; i < count; i++) {
       const q = makeQuestion(mode);
@@ -537,7 +622,8 @@
   }
 
   function renderQuestion() {
-    const box = $("quizBox");
+    const box = el("quizBox");
+    if (!box) return;
     if (!quiz.questions.length) {
       box.innerHTML = `<div class="question">Не удалось создать тест. Добавь данные в админке.</div>`;
       return;
@@ -581,15 +667,18 @@
       if (btn.dataset.id === q.correct) btn.classList.add("right");
       if (btn.dataset.id === selectedId && !ok) btn.classList.add("wrong");
     });
-    $("answerInfo").innerHTML = `
-      <div class="explain"><b>${ok ? "Верно." : "Ошибка."}</b> ${esc(q.explain)}</div>
-      <br><button id="nextQuestion" class="primary-btn">Дальше</button>
-    `;
-    $("nextQuestion").addEventListener("click", () => {
-      quiz.index++;
-      quiz.answered = false;
-      renderQuestion();
-    });
+    const info = el("answerInfo");
+    if (info) {
+      info.innerHTML = `
+        <div class="explain"><b>${ok ? "Верно." : "Ошибка."}</b> ${esc(q.explain)}</div>
+        <br><button id="nextQuestion" class="primary-btn">Дальше</button>
+      `;
+      el("nextQuestion")?.addEventListener("click", () => {
+        quiz.index++;
+        quiz.answered = false;
+        renderQuestion();
+      });
+    }
     renderMistakes();
   }
 
@@ -605,12 +694,14 @@
   }
 
   function renderMistakes() {
+    const box = el("mistakesBox");
+    if (!box) return;
     const mistakes = getMistakes();
     if (!mistakes.length) {
-      $("mistakesBox").innerHTML = `<p class="muted">Ошибок пока нет.</p>`;
+      box.innerHTML = `<p class="muted">Ошибок пока нет.</p>`;
       return;
     }
-    $("mistakesBox").innerHTML = mistakes.map((m) => `
+    box.innerHTML = mistakes.map((m) => `
       <div class="mistake">
         <b>${esc(m.text)}</b>
         <p>${esc(m.explain)}</p>
