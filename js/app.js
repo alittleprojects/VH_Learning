@@ -256,15 +256,30 @@
     renderCompatChecks(selected, $("coilSearch").value);
   });
 
-  function setPreview(img, src) {
-    if (src) {
-      img.src = src;
-      img.hidden = false;
-    } else {
-      img.removeAttribute("src");
-      img.hidden = true;
-    }
+ function setPreview(img, src) {
+  if (!src) {
+    img.removeAttribute("src");
+    img.hidden = true;
+    return;
   }
+
+  // Если путь относительный (начинается с images/) — подставляем базу GitHub
+  let finalSrc = src;
+  if (src.startsWith("images/")) {
+    // 👇 ЗАМЕНИ на свой ник и название репозитория
+    const GITHUB_BASE = "https://raw.githubusercontent.com/ТВОЙ-НИК/ТВОЙ-РЕПО/main/";
+    finalSrc = GITHUB_BASE + src;
+  }
+
+  img.src = finalSrc;
+  img.hidden = false;
+
+  // Если картинка не загрузилась — показываем ошибку
+  img.onerror = () => {
+    img.hidden = true;
+    console.warn("Не удалось загрузить фото:", finalSrc);
+  };
+}
 
   // --- Форма устройства ---
   $("deviceSelect").addEventListener("change", () => {
