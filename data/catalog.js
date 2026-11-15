@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-15T19:15:02.274Z",
+    "updatedAt": "2026-11-15T19:49:40.515Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -294,6 +294,26 @@ window.CATALOG_DATA = {
       "price": 420,
       "image": "",
       "description": "Для Orion Art / Orion Q."
+    },
+    {
+      "id": "coil-1794770397313-046f7",
+      "brand": "Vaporesso",
+      "name": "XROS Series Cartridge",
+      "resistance": "0.7Ω",
+      "type": "картридж",
+      "price": 370,
+      "description": "",
+      "image": ""
+    },
+    {
+      "id": "coil-1794771034791-25ab6",
+      "brand": "GeekVape",
+      "name": "B Series",
+      "resistance": "0.2",
+      "type": "испаритель",
+      "price": 370,
+      "description": "",
+      "image": ""
     }
   ],
   "devices": [
@@ -311,7 +331,8 @@ window.CATALOG_DATA = {
         "xros-06",
         "xros-08",
         "xros-10",
-        "xros-12"
+        "xros-12",
+        "coil-1794770397313-046f7"
       ]
     },
     {
@@ -322,13 +343,14 @@ window.CATALOG_DATA = {
       "price": 2690,
       "description": "Будет потом",
       "popular": true,
-      "image": "",
+      "image": "images/devices/xros_pro_2.jpg",
       "coils": [
         "xros-04",
         "xros-06",
         "xros-08",
         "xros-10",
-        "xros-12"
+        "xros-12",
+        "coil-1794770397313-046f7"
       ]
     },
     {
@@ -443,7 +465,8 @@ window.CATALOG_DATA = {
       "description": "Защищённый Pod-Mod. B-Series испарители.",
       "coils": [
         "geek-b-04",
-        "geek-b-06"
+        "geek-b-06",
+        "coil-1794771034791-25ab6"
       ]
     },
     {
