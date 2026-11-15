@@ -33,11 +33,28 @@
   };
   const uid = (p) => `${p}-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`;
 
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch {}
+      ta.remove();
+      return true;
+    }
+  }
+
   /* ================= СОСТОЯНИЕ ================= */
   let db = loadDb();
   let view = "devices";
   let currentBrand = "Все";
-  let compatSelection = new Set(); // выбранные картриджи для устройства (не теряются при поиске)
+  let compatSelection = new Set();
   let quiz = { questions: [], index: 0, score: 0, answered: false };
 
   /* ================= БАЗА ================= */
@@ -94,6 +111,7 @@
   const deviceLabel = (d) => d ? `${d.brand} ${d.model}`.trim() : "Неизвестное устройство";
   const compatibleCoils = (d) => (d.coils || []).map(coilById).filter(Boolean);
   const compatibleDevices = (c) => db.devices.filter((d) => (d.coils || []).includes(c.id));
+  const itemUrl = (kind, id) => `item.html?type=${kind}&id=${encodeURIComponent(id)}`;
 
   function toFullUrl(src) {
     if (!src) return "";
@@ -120,7 +138,7 @@
     img.src = toFullUrl(src);
   }
 
-  /* ================= TOAST + ОТМЕНА ================= */
+  /* ================= TOAST ================= */
   let toastTimer = null;
   function toast(message, action) {
     let node = $("vaToast");
@@ -142,6 +160,40 @@
   function hideToast() {
     const n = $("vaToast");
     if (n) n.classList.remove("show");
+  }
+
+  /* ================= ДОП. СТИЛИ ДЛЯ ССЫЛОК ================= */
+  function injectLinkStyles() {
+    if ($("vaLinkStyles")) return;
+    const style = document.createElement("style");
+    style.id = "vaLinkStyles";
+    style.textContent = `
+      .card-link { display: block; color: inherit; text-decoration: none; }
+      .card-cta {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-top: 12px; padding-top: 10px;
+        border-top: 1px dashed var(--border);
+        color: var(--accent2); font-size: 13px; font-weight: 700;
+        opacity: .7; transition: .2s;
+      }
+      .card-link:hover .card-cta { opacity: 1; }
+      .card-cta b { transition: .2s; }
+      .card-link:hover .card-cta b { transform: translateX(5px); }
+      .page-link-bar {
+        display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+        margin: 0 0 14px; padding: 10px 12px;
+        border: 1px solid rgba(124,92,255,.4); border-radius: 12px;
+        background: rgba(124,92,255,.08);
+      }
+      .plb-label {
+        font-size: 11px; color: var(--muted); font-weight: 800;
+        text-transform: uppercase; letter-spacing: .06em;
+      }
+      .plb-link { font-size: 13px; color: var(--accent2); word-break: break-all; flex: 1; min-width: 160px; }
+      .plb-link.disabled { color: var(--muted); pointer-events: none; }
+      .plb-copy { padding: 6px 10px; font-size: 12px; }
+    `;
+    document.head.appendChild(style);
   }
 
   /* ================= ВКЛАДКИ ================= */
@@ -217,7 +269,7 @@
   function deviceCard(d) {
     const coils = compatibleCoils(d);
     return `
-      <article class="card">
+      <a class="card card-link" href="${itemUrl("device", d.id)}" title="Открыть ${esc(deviceLabel(d))}">
         ${d.popular ? `<div class="badge">ХИТ</div>` : ""}
         ${imageBox(d, d.model)}
         <div class="card-body">
@@ -236,14 +288,15 @@
                 : `<span class="chip">Совместимость не заполнена</span>`}
             </div>
           </div>
+          <div class="card-cta"><span>Открыть карточку</span><b>→</b></div>
         </div>
-      </article>`;
+      </a>`;
   }
 
   function coilCard(c) {
     const devices = compatibleDevices(c);
     return `
-      <article class="card">
+      <a class="card card-link" href="${itemUrl("coil", c.id)}" title="Открыть ${esc(coilLabel(c))}">
         ${imageBox(c, `${c.name} ${c.resistance || ""}`)}
         <div class="card-body">
           <div class="brand">${esc(c.brand)}</div>
@@ -261,8 +314,9 @@
                 : `<span class="chip">Нет привязанных устройств</span>`}
             </div>
           </div>
+          <div class="card-cta"><span>Открыть карточку</span><b>→</b></div>
         </div>
-      </article>`;
+      </a>`;
   }
 
   /* ================= АДМИНКА ================= */
@@ -325,6 +379,47 @@
     coilSearch.addEventListener("input", () => renderCompatChecks(coilSearch.value));
   }
 
+  /* --- Панель ссылки на страницу товара --- */
+  function ensurePageBar(formId) {
+    const form = $(formId);
+    if (!form) return null;
+    let bar = form.querySelector(".page-link-bar");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.className = "page-link-bar";
+      bar.innerHTML = `
+        <span class="plb-label">Страница товара</span>
+        <a class="plb-link disabled" target="_blank" rel="noopener">появится после сохранения</a>
+        <button type="button" class="small-btn plb-copy">Копировать</button>`;
+      const actions = form.querySelector(".form-actions");
+      if (actions) form.insertBefore(bar, actions);
+      else form.appendChild(bar);
+
+      bar.querySelector(".plb-copy").addEventListener("click", async () => {
+        const a = bar.querySelector(".plb-link");
+        if (!a.href || a.classList.contains("disabled")) return toast("Сначала сохрани товар.");
+        await copyText(a.href);
+        toast("Ссылка на страницу скопирована");
+      });
+    }
+    return bar;
+  }
+
+  function updatePageBar(kind, id) {
+    const bar = ensurePageBar(kind === "device" ? "deviceForm" : "coilForm");
+    if (!bar) return;
+    const a = bar.querySelector(".plb-link");
+    if (id) {
+      a.href = itemUrl(kind, id);
+      a.textContent = itemUrl(kind, id);
+      a.classList.remove("disabled");
+    } else {
+      a.removeAttribute("href");
+      a.textContent = "появится после сохранения";
+      a.classList.add("disabled");
+    }
+  }
+
   /* --- Форма устройства --- */
   if (deviceSelect) {
     deviceSelect.addEventListener("change", () => {
@@ -344,6 +439,7 @@
       compatSelection = new Set(d.coils || []);
       if (coilSearch) coilSearch.value = "";
       renderCompatChecks();
+      updatePageBar("device", id);
     });
   }
 
@@ -374,7 +470,10 @@
       deviceSelect.value = id;
       deviceSelect.dispatchEvent(new Event("change"));
     }
-    toast("Устройство сохранено");
+    toast("Устройство сохранено — страница создана", {
+      label: "Открыть",
+      fn: () => { window.location.href = itemUrl("device", id); }
+    });
   });
 
   on("newDevice", "click", () => clearDeviceForm(true));
@@ -399,6 +498,7 @@
     compatSelection = new Set();
     if (coilSearch) coilSearch.value = "";
     renderCompatChecks();
+    updatePageBar("device", null);
   }
 
   /* --- Форма испарителя --- */
@@ -417,6 +517,7 @@
       $("cDescription").value = c.description || "";
       $("cImagePath").value = c.image || "";
       setPreview($("cPreview"), c.image);
+      updatePageBar("coil", id);
     });
   }
 
@@ -446,7 +547,10 @@
       coilSelect.value = id;
       coilSelect.dispatchEvent(new Event("change"));
     }
-    toast("Испаритель сохранён");
+    toast("Испаритель сохранён — страница создана", {
+      label: "Открыть",
+      fn: () => { window.location.href = itemUrl("coil", id); }
+    });
   });
 
   on("newCoil", "click", () => clearCoilForm(true));
@@ -469,6 +573,7 @@
     if (resetSelect && coilSelect) coilSelect.value = "";
     $("coilForm")?.reset();
     const p = $("cPreview"); if (p) p.hidden = true;
+    updatePageBar("coil", null);
   }
 
   /* --- Экспорт / Импорт / Сброс --- */
@@ -519,7 +624,6 @@
   });
 
   /* ================= ТРЕНАЖЁР ================= */
-  // Режим «Цены» убран по требованию — даже если option остался в HTML
   const trainMode = $("trainMode");
   if (trainMode) {
     trainMode.querySelector('option[value="price"]')?.remove();
@@ -682,6 +786,23 @@
       : `<p class="muted">Ошибок пока нет.</p>`;
   }
 
+  /* ================= DEEP LINK ИЗ АДМИНКИ ================= */
+  function applyHash() {
+    if (!isAdminPage) return;
+    const m = location.hash.match(/^#(device|coil)=(.+)$/);
+    if (!m) return;
+    const kind = m[1];
+    const id = decodeURIComponent(m[2]);
+    const sel = kind === "device" ? deviceSelect : coilSelect;
+    if (sel && [...sel.options].some((o) => o.value === id)) {
+      document.querySelector('.tab[data-tab="admin"]')?.click();
+      sel.value = id;
+      sel.dispatchEvent(new Event("change"));
+      sel.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+  window.addEventListener("hashchange", applyHash);
+
   /* ================= ЗАПУСК ================= */
   function renderAll() {
     renderBrandFilter();
@@ -690,5 +811,7 @@
     renderMistakes();
   }
 
+  injectLinkStyles();
   renderAll();
+  applyHash();
 })();
