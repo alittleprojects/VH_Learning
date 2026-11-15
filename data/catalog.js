@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-15T17:35:42.054Z",
+    "updatedAt": "2026-11-15T17:59:57.503Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -305,7 +305,7 @@ window.CATALOG_DATA = {
       "price": 1690,
       "description": "Топ-продаж. Регулировка обдува, Type-C, 1000 мАч. Подходят картриджи XROS Series.",
       "popular": true,
-      "image": "images/devices/hgXN9Go-yCs.jpg",
+      "image": "images/devices/xros4.png",
       "coils": [
         "xros-04",
         "xros-06",
