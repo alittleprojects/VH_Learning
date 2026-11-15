@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VapeAcademy — обучение продавцов</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <h1>VapeAcademy</h1>
+    <p>Обучение продавцов-консультантов · устройства, картриджи, цены, совместимость</p>
+  </div>
+  <div class="age">18+</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="catalog">Каталог</button>
+  <button class="tab" data-tab="training">Тренажёр</button>
+  <button class="tab" data-tab="admin">Админка</button>
+</nav>
+
+<main>
+
+  <!-- =================== КАТАЛОГ =================== -->
+  <section id="catalog" class="page active">
+    <div class="toolbar">
+      <input id="searchInput" type="search" placeholder="Поиск: XROS, PnP, GTX, Minican..." />
+      <select id="brandFilter"><option value="Все">Все бренды</option></select>
+      <div class="view-switch">
+        <button id="viewDevices" class="small-btn active">Устройства</button>
+        <button id="viewCoils" class="small-btn">Испарители / картриджи</button>
+      </div>
+    </div>
+
+    <div class="notice">
+      <b>Совет:</b> в админке можно редактировать описание, цены, фото и совместимость.
+    </div>
+
+    <div id="catalogStats" class="stats"></div>
+    <div id="catalogGrid" class="grid"></div>
+  </section>
+
+  <!-- =================== ТРЕНАЖЁР =================== -->
+  <section id="training" class="page" hidden>
+    <div class="panel">
+      <h2>Тренажёр продавца</h2>
+      <p class="muted">Проверка знаний: устройство → картридж, картридж → устройство, цены.</p>
+
+      <div class="training-controls">
+        <label>Режим:
+          <select id="trainMode">
+            <option value="mix">Смешанный тест</option>
+            <option value="device-coil">Устройство → картридж</option>
+            <option value="coil-device">Картридж → устройство</option>
+            <option value="price">Цены</option>
+          </select>
+        </label>
+        <label>Вопросов:
+          <select id="trainCount">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+          </select>
+        </label>
+        <button id="startQuiz" class="primary-btn">Начать тест</button>
+      </div>
+    </div>
+
+    <div id="quizBox" class="quiz-box"></div>
+
+    <div class="panel">
+      <div class="row-between">
+        <h3>Ошибки продавца</h3>
+        <button id="clearMistakes" class="danger-btn small">Очистить</button>
+      </div>
+      <div id="mistakesBox"></div>
+    </div>
+  </section>
+
+  <!-- =================== АДМИНКА =================== -->
+  <section id="admin" class="page" hidden>
+
+    <div class="panel">
+      <h2>⚙️ Управление базой</h2>
+      <p class="muted">
+        Фото загружаются на GitHub (папка <code>images/</code>). 
+        Скопируй ссылку на файл (кнопка <b>Raw</b> на GitHub) и вставь в поле «Ссылка на фото».
+      </p>
+
+      <div class="admin-actions">
+        <button id="exportBtn" class="primary-btn">💾 Экспорт catalog.js</button>
+        <label class="import-btn">
+          📥 Импорт catalog.js / JSON
+          <input id="importFile" type="file" accept=".js,.json" hidden />
+        </label>
+        <button id="resetBtn" class="danger-btn">Сбросить к демо-базе</button>
+      </div>
+      <div id="adminStats" class="stats"></div>
+    </div>
+
+    <div class="admin-grid">
+
+      <!-- ========== ФОРМА УСТРОЙСТВА ========== -->
+      <form id="deviceForm" class="panel form">
+        <h3>📱 Устройство</h3>
+
+        <label>Выбрать устройство:
+          <select id="deviceSelect"></select>
+        </label>
+
+        <div class="two">
+          <label>Бренд:
+            <input id="dBrand" placeholder="VOOPOO / Vaporesso..." required />
+          </label>
+          <label>Модель:
+            <input id="dModel" placeholder="XROS 4 / Drag S2..." required />
+          </label>
+        </div>
+
+        <div class="two">
+          <label>Тип:
+            <input id="dType" placeholder="POD / Pod-Mod / Box-Mod" />
+          </label>
+          <label>Цена, ₽:
+            <input id="dPrice" type="number" min="0" step="1" placeholder="1490" />
+          </label>
+        </div>
+
+        <label>Описание для продавца:
+          <textarea id="dDescription" rows="3" placeholder="Краткое описание, особенности, кому подходит..."></textarea>
+        </label>
+
+        <label class="checkline">
+          <input id="dPopular" type="checkbox" />
+          Популярное устройство (отметить как ХИТ)
+        </label>
+
+        <div class="photo-block">
+          <div class="subhead">Фото устройства</div>
+          <label>Ссылка на фото (URL с GitHub):
+            <input id="dImagePath" placeholder="images/devices/xros-4.webp или https://raw.githubusercontent.com/..." />
+          </label>
+          <img id="dPreview" class="preview" hidden />
+        </div>
+
+        <div class="subhead">Совместимые испарители / картриджи</div>
+        <input id="coilSearch" type="search" placeholder="🔍 Поиск картриджа..." class="search-small" />
+        <div id="compatChecks" class="checks"></div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-btn">💾 Сохранить</button>
+          <button type="button" id="newDevice" class="small-btn">➕ Новое</button>
+          <button type="button" id="deleteDevice" class="danger-btn">🗑 Удалить</button>
+        </div>
+      </form>
+
+      <!-- ========== ФОРМА ИСПАРИТЕЛЯ ========== -->
+      <form id="coilForm" class="panel form">
+        <h3>🔧 Испаритель / картридж</h3>
+
+        <label>Выбрать испаритель:
+          <select id="coilSelect"></select>
+        </label>
+
+        <div class="two">
+          <label>Бренд:
+            <input id="cBrand" placeholder="Vaporesso / GeekVape..." required />
+          </label>
+          <label>Название:
+            <input id="cName" placeholder="XROS Pod / PnP / GTX..." required />
+          </label>
+        </div>
+
+        <div class="two">
+          <label>Сопротивление:
+            <input id="cResistance" placeholder="0.6Ω / 0.8Ω / 1.2Ω" />
+          </label>
+          <label>Тип:
+            <input id="cType" placeholder="картридж / испаритель" />
+          </label>
+        </div>
+
+        <label>Цена, ₽:
+          <input id="cPrice" type="number" min="0" step="1" placeholder="450" />
+        </label>
+
+        <label>Описание для продавца:
+          <textarea id="cDescription" rows="3" placeholder="Особенности, тип затяжки, для какой жидкости..."></textarea>
+        </label>
+
+        <div class="photo-block">
+          <div class="subhead">Фото испарителя</div>
+          <label>Ссылка на фото (URL с GitHub):
+            <input id="cImagePath" placeholder="images/coils/xros-08.webp или https://raw.githubusercontent.com/..." />
+          </label>
+          <img id="cPreview" class="preview" hidden />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-btn">💾 Сохранить</button>
+          <button type="button" id="newCoil" class="small-btn">➕ Новое</button>
+          <button type="button" id="deleteCoil" class="danger-btn">🗑 Удалить</button>
+        </div>
+      </form>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>Учебный инструмент для сотрудников · Не является рекламой и публичной офертой · 18+</footer>
+
+<script src="data/catalog.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
