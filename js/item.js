@@ -2,7 +2,6 @@
   "use strict";
 
   const STORAGE_KEY = "vape_academy_catalog_v6";
-  const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ilushka28/VH_Learning/main/";
 
   const $ = (id) => document.getElementById(id);
   const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -16,11 +15,44 @@
   const uid = (p) => `${p}-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`;
   const itemUrl = (kind, id) => `item.html?type=${kind}&id=${encodeURIComponent(id)}`;
 
+  /* Пути к фото резолвятся от текущей страницы — работает на любом аккаунте GitHub */
   function toFullUrl(src) {
     if (!src) return "";
-    if (/^https?:\/\//i.test(src)) return src;
-    if (src.startsWith("images/")) return GITHUB_RAW_BASE + src;
-    return src;
+    if (/^(https?:|data:|blob:)/i.test(src)) return src;
+    try { return new URL(src, document.baseURI).href; } catch { return src; }
+  }
+
+  const resistanceNum = (c) => {
+    const m = String(c.resistance || "").match(/\d+(?:\.\d+)?/);
+    return m ? parseFloat(m[0]) : 999;
+  };
+
+  const fmtRes = (r) => {
+    const s = String(r || "").trim();
+    if (!s) return "";
+    if (/Ω/.test(s)) return s;
+    if (/ω|ом|ohm/i.test(s)) return s.replace(/ω|ом|ohm/gi, "Ω");
+    const m = s.match(/\d+(?:\.\d+)?/);
+    if (!m) return s;
+    const n = parseFloat(m[0]);
+    const num = Number.isInteger(n) ? n.toFixed(1) : String(parseFloat(n.toFixed(2)));
+    return s.replace(m[0], num) + "Ω";
+  };
+
+  function sortCoils(arr) {
+    return [...arr].sort((a, b) =>
+      String(a.brand).localeCompare(String(b.brand), "ru") ||
+      String(a.name).localeCompare(String(b.name), "ru") ||
+      resistanceNum(a) - resistanceNum(b) ||
+      String(a.id).localeCompare(String(b.id))
+    );
+  }
+  function sortDevices(arr) {
+    return [...arr].sort((a, b) =>
+      Number(b.popular) - Number(a.popular) ||
+      String(a.brand).localeCompare(String(b.brand), "ru") ||
+      String(a.model).localeCompare(String(b.model), "ru")
+    );
   }
 
   function normalize(data) {
@@ -56,12 +88,11 @@
   const db = loadDb();
   const coilById = (id) => db.coils.find((c) => c.id === id);
   const deviceById = (id) => db.devices.find((d) => d.id === id);
-  const coilLabel = (c) => c ? `${c.brand} ${c.name} ${c.resistance || ""}`.trim() : "Картридж";
+  const coilLabel = (c) => c ? `${c.brand} ${c.name} ${fmtRes(c.resistance)}`.trim() : "Картридж";
   const deviceLabel = (d) => d ? `${d.brand} ${d.model}`.trim() : "Устройство";
   const compatibleCoils = (d) => (d.coils || []).map(coilById).filter(Boolean);
   const compatibleDevices = (c) => db.devices.filter((d) => (d.coils || []).includes(c.id));
 
-  /* ---------- Поиск товара по URL ---------- */
   const params = new URLSearchParams(location.search);
   let kind = params.get("type");
   const id = params.get("id");
@@ -74,7 +105,6 @@
     kind = deviceById(id) ? "device" : (coilById(id) ? "coil" : null);
   }
 
-  /* ---------- Toast ---------- */
   let toastTimer = null;
   function toast(message) {
     let node = $("vaToast");
@@ -102,7 +132,6 @@
     toast("Ссылка скопирована");
   }
 
-  /* ---------- Lightbox ---------- */
   function openLightbox(src) {
     const lb = $("lightbox");
     const img = $("lightboxImg");
@@ -120,7 +149,6 @@
   $("lightboxClose")?.addEventListener("click", closeLightbox);
   $("lightbox")?.addEventListener("click", (e) => { if (e.target === $("lightbox")) closeLightbox(); });
 
-  /* ---------- Рендер ---------- */
   const root = $("itemRoot");
   const crumbs = $("crumbs");
 
@@ -129,13 +157,15 @@
     if (!item || !kind) return renderNotFound();
 
     const isDevice = kind === "device";
-    const title = isDevice ? item.model : `${item.name} ${item.resistance || ""}`.trim();
+    const title = isDevice ? item.model : `${item.name} ${fmtRes(item.resistance)}`.trim();
     const fullTitle = `${item.brand} ${title}`.trim();
-    const related = isDevice ? compatibleCoils(item) : compatibleDevices(item);
+    const related = isDevice
+      ? sortCoils(compatibleCoils(item))
+      : sortDevices(compatibleDevices(item));
     const relatedKind = isDevice ? "coil" : "device";
     const imageSrc = item.image ? toFullUrl(item.image) : "";
 
-    document.title = `${fullTitle} — V&amp;H`;
+    document.title = `${fullTitle} — V&H`;
 
     if (crumbs) {
       crumbs.innerHTML = `
@@ -151,7 +181,7 @@
       ["Цена", money(item.price)]
     ] : [
       ["Бренд", item.brand],
-      ["Сопротивление", item.resistance || "—"],
+      ["Сопротивление", fmtRes(item.resistance) || "—"],
       ["Тип", item.type || "картридж"],
       ["Подходит к", `${related.length} устройствам`]
     ];
@@ -171,7 +201,7 @@
           <h1 class="item-title">${esc(title)}</h1>
           <div class="tag-row">
             <span class="tag">${esc(isDevice ? (item.type || "POD") : (item.type || "картридж"))}</span>
-            ${!isDevice && item.resistance ? `<span class="tag">${esc(item.resistance)}</span>` : ""}
+            ${!isDevice && item.resistance ? `<span class="tag">${esc(fmtRes(item.resistance))}</span>` : ""}
             <span class="tag tag-id">ID: ${esc(item.id)}</span>
           </div>
           <div class="price-big">${money(item.price)}</div>
@@ -210,8 +240,8 @@
 
   function miniCard(k, obj) {
     const isDev = k === "device";
-    const title = isDev ? obj.model : `${obj.name} ${obj.resistance || ""}`.trim();
-    const sub = isDev ? (obj.type || "POD") : `${obj.type || "картридж"} · ${obj.resistance || "—"}`;
+    const title = isDev ? obj.model : `${obj.name} ${fmtRes(obj.resistance)}`.trim();
+    const sub = isDev ? (obj.type || "POD") : `${obj.type || "картридж"} · ${fmtRes(obj.resistance) || "—"}`;
     const src = obj.image ? toFullUrl(obj.image) : "";
     return `
       <a class="mini-card" href="${itemUrl(k, obj.id)}">
@@ -230,21 +260,14 @@
   }
 
   function sortedList(k) {
-    if (k === "device") {
-      return [...db.devices].sort((a, b) =>
-        Number(b.popular) - Number(a.popular) ||
-        `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`)
-      );
-    }
-    return [...db.coils].sort((a, b) =>
-      `${a.brand} ${a.name} ${a.resistance}`.localeCompare(`${b.brand} ${b.name} ${b.resistance}`)
-    );
+    return k === "device" ? sortDevices(db.devices) : sortCoils(db.coils);
   }
 
   function pagerHTML(k, current) {
     const list = sortedList(k);
     if (list.length < 2) return "";
     const i = list.findIndex((x) => x.id === current.id);
+    if (i === -1) return "";
     const prev = list[(i - 1 + list.length) % list.length];
     const next = list[(i + 1) % list.length];
     const name = (o) => k === "device" ? deviceLabel(o) : coilLabel(o);
@@ -262,7 +285,8 @@
   }
 
   function brandStripHTML(k, current) {
-    const list = (k === "device" ? db.devices : db.coils)
+    const source = k === "device" ? sortDevices(db.devices) : sortCoils(db.coils);
+    const list = source
       .filter((x) => x.brand === current.brand && x.id !== current.id)
       .slice(0, 8);
     if (!list.length) return "";
@@ -277,7 +301,7 @@
   }
 
   function renderNotFound() {
-    document.title = "Товар не найден — V&amp;H";
+    document.title = "Товар не найден — V&H";
     if (crumbs) crumbs.innerHTML = `<a href="index.html">Каталог</a><span>/</span><b>Не найдено</b>`;
     root.innerHTML = `
       <div class="not-found reveal">
@@ -288,7 +312,6 @@
       </div>`;
   }
 
-  /* ---------- Клавиатура ---------- */
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeLightbox();
     if ($("lightbox") && !$("lightbox").hidden) return;
