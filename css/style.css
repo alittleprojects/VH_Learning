@@ -12,7 +12,10 @@
   --danger: #ff5c7a;
   --success: #43d17a;
   --warn: #ffbf47;
+  --photo-bg: #ffffff;
 }
+
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
@@ -28,7 +31,20 @@ body {
 a { color: var(--accent2); }
 code { background: var(--card2); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
 
-/* HEADER */
+:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+
+/* ===== Скроллбары в стиле сайта ===== */
+* { scrollbar-width: thin; scrollbar-color: var(--accent) var(--bg); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
+
+/* ===== HEADER ===== */
 .header {
   padding: 24px 20px;
   display: flex;
@@ -54,9 +70,10 @@ code { background: var(--card2); padding: 2px 6px; border-radius: 4px; font-size
   padding: 8px 12px;
   border-radius: 999px;
   font-weight: 800;
+  flex-shrink: 0;
 }
 
-/* TABS */
+/* ===== TABS ===== */
 .tabs {
   position: sticky;
   top: 0;
@@ -77,10 +94,13 @@ button, .import-btn { border: 0; cursor: pointer; font: inherit; }
   border: 1px solid var(--border);
   border-radius: 999px;
   color: var(--text);
+  transition: .2s;
 }
+.tab:hover, .small-btn:hover, .import-btn:hover { border-color: var(--accent); }
 .tab.active, .small-btn.active {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   border-color: transparent;
+  color: #fff;
 }
 
 .primary-btn {
@@ -89,28 +109,28 @@ button, .import-btn { border: 0; cursor: pointer; font: inherit; }
   color: #fff;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   font-weight: 700;
+  transition: .2s;
 }
+.primary-btn:hover { filter: brightness(1.12); transform: translateY(-1px); }
 .danger-btn {
   padding: 10px 16px;
   border-radius: 12px;
   color: #fff;
   background: var(--danger);
   font-weight: 700;
+  transition: .2s;
 }
+.danger-btn:hover { filter: brightness(1.1); }
 .danger-btn.small { padding: 7px 10px; font-size: 13px; }
 
-/* MAIN */
+/* ===== MAIN ===== */
 main { max-width: 1360px; margin: 0 auto; padding: 20px; }
 .page { display: none; }
-.page.active { display: block; }
+.page.active { display: block; animation: fade .25s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-/* TOOLBAR */
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 14px;
-}
+/* ===== TOOLBAR ===== */
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
 input, select, textarea {
   width: 100%;
   padding: 11px 12px;
@@ -120,6 +140,7 @@ input, select, textarea {
   color: var(--text);
   outline: none;
   font: inherit;
+  transition: border-color .2s;
 }
 input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 textarea { resize: vertical; min-height: 70px; }
@@ -140,7 +161,7 @@ textarea { resize: vertical; min-height: 70px; }
 .stats, .muted { color: var(--muted); }
 .stats { margin: 12px 0; font-size: 14px; }
 
-/* CATALOG GRID */
+/* ===== CATALOG GRID ===== */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
@@ -167,10 +188,12 @@ textarea { resize: vertical; min-height: 70px; }
   border-radius: 999px;
   font-size: 12px;
   font-weight: 900;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .35);
 }
 
+/* ===== ФОТО: белый фон вокруг изображения ===== */
 .photo {
-  height: 210px;
+  height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -178,15 +201,28 @@ textarea { resize: vertical; min-height: 70px; }
     linear-gradient(135deg, rgba(124, 92, 255, .25), rgba(0, 212, 255, .12)),
     var(--card2);
   overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+/* Когда фото есть — чистый белый фон с мягким внутренним кантом */
+.photo.has { background: var(--photo-bg); }
+.photo.has::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgba(13, 17, 23, .08);
+  pointer-events: none;
 }
 .photo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 14px;
+  padding: 18px; /* белое поле вокруг товара */
+  transition: transform .35s ease;
 }
+.card:hover .photo.has img { transform: scale(1.05); }
 .photo b {
-  font-size: 28px;
+  font-size: 26px;
   text-align: center;
   padding: 20px;
   color: rgba(255, 255, 255, .9);
@@ -235,7 +271,7 @@ textarea { resize: vertical; min-height: 70px; }
   font-size: 12px;
 }
 
-/* TRAINING */
+/* ===== TRAINING ===== */
 .training-controls, .admin-actions, .form-actions, .row-between {
   display: flex;
   flex-wrap: wrap;
@@ -253,6 +289,41 @@ textarea { resize: vertical; min-height: 70px; }
   padding: 18px;
 }
 .question h3 { margin-top: 0; }
+
+.quiz-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.quiz-bar {
+  height: 6px;
+  background: var(--card2);
+  border-radius: 99px;
+  overflow: hidden;
+  margin: 12px 0 16px;
+}
+.quiz-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width .3s ease;
+}
+
+/* Фото в вопросе — тоже на белом фоне */
+.quiz-media {
+  height: 190px;
+  background: var(--photo-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.quiz-media img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  padding: 12px;
+}
+
 .answers { display: grid; gap: 10px; }
 .answer {
   text-align: left;
@@ -261,9 +332,12 @@ textarea { resize: vertical; min-height: 70px; }
   background: var(--card2);
   color: var(--text);
   border: 1px solid var(--border);
+  transition: .15s;
 }
-.answer.right { border-color: var(--success); background: rgba(67, 209, 122, .14); }
-.answer.wrong { border-color: var(--danger); background: rgba(255, 92, 122, .14); }
+.answer:not(:disabled):hover { border-color: var(--accent); transform: translateX(3px); }
+.answer:disabled { cursor: default; opacity: .75; }
+.answer.right { border-color: var(--success); background: rgba(67, 209, 122, .14); opacity: 1; }
+.answer.wrong { border-color: var(--danger); background: rgba(255, 92, 122, .14); opacity: 1; }
 .explain {
   margin-top: 12px;
   padding: 12px;
@@ -271,24 +345,14 @@ textarea { resize: vertical; min-height: 70px; }
   border-radius: 12px;
 }
 
-/* ADMIN */
-.admin-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.form label {
-  display: block;
-  margin-bottom: 12px;
-  color: var(--muted);
-  font-size: 14px;
-}
+/* ===== ADMIN ===== */
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form label { display: block; margin-bottom: 12px; color: var(--muted); font-size: 14px; }
 .form input, .form select, .form textarea { margin-top: 5px; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .checkline { display: flex !important; align-items: center; gap: 8px; }
 .checkline input { width: auto; margin: 0; }
 
-/* PHOTO BLOCK */
 .photo-block {
   border: 1px dashed var(--border);
   border-radius: 12px;
@@ -296,28 +360,21 @@ textarea { resize: vertical; min-height: 70px; }
   margin-bottom: 14px;
   background: rgba(13, 17, 23, .4);
 }
+/* Превью в админке — белый фон вокруг фото */
 .preview {
-  width: 160px;
-  height: 160px;
+  width: 170px;
+  height: 170px;
   object-fit: contain;
-  background: var(--card2);
+  background: var(--photo-bg);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 8px;
+  padding: 10px;
   margin-top: 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
 }
 
-.subhead {
-  margin: 14px 0 8px;
-  font-weight: 800;
-  color: var(--text);
-}
-
-.search-small {
-  padding: 9px 12px;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
+.subhead { margin: 14px 0 8px; font-weight: 800; color: var(--text); }
+.search-small { padding: 9px 12px; font-size: 14px; margin-bottom: 8px; }
 
 .checks {
   max-height: 280px;
@@ -337,23 +394,42 @@ textarea { resize: vertical; min-height: 70px; }
 }
 .checks label:last-child { margin-bottom: 0; }
 .checks input { width: auto; margin: 0; }
-.checks .coil-brand {
-  color: var(--accent2);
-  font-size: 12px;
-  margin-left: 4px;
-}
+.checks .coil-brand { color: var(--accent2); font-size: 12px; margin-left: 4px; }
 
-.mistake {
-  border-top: 1px solid var(--border);
-  padding: 10px 0;
-}
+.mistake { border-top: 1px solid var(--border); padding: 10px 0; }
 .mistake:first-child { border-top: 0; }
 
-.empty {
-  color: var(--muted);
-  padding: 30px;
-  text-align: center;
-  grid-column: 1 / -1;
+.empty { color: var(--muted); padding: 30px; text-align: center; grid-column: 1 / -1; }
+
+/* ===== TOAST / ОТМЕНА ===== */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  pointer-events: none;
+  background: var(--card);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  padding: 12px 16px;
+  border-radius: 14px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  z-index: 9999;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+  transition: .25s;
+  max-width: min(92vw, 480px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.toast-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  padding: 7px 12px;
+  border-radius: 9px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 footer {
@@ -375,4 +451,8 @@ footer {
   .two { grid-template-columns: 1fr; }
   .grid { grid-template-columns: 1fr; }
   #brandFilter { max-width: none; }
+  .photo { height: 200px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
 }
