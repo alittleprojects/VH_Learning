@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Карточка товара — VapeAcademy</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/item.css" />
+</head>
+<body class="item-page">
+
+<div class="item-aurora" aria-hidden="true"></div>
+
+<header class="header item-header">
+  <div>
+    <h1><a href="index.html" class="logo-link">VapeAcademy</a></h1>
+    <p>Карточка товара · совместимость, фото, цена и описание</p>
+  </div>
+  <div class="header-actions">
+    <a href="index.html" class="ghost-btn">← Каталог</a>
+    <div class="age">18+</div>
+  </div>
+</header>
+
+<main class="item-shell">
+  <nav class="crumbs" id="crumbs" aria-label="Навигация"></nav>
+  <div id="itemRoot"></div>
+</main>
+
+<footer>
+  Учебный инструмент для сотрудников · Не является рекламой и публичной офертой · 18+
+</footer>
+
+<div id="lightbox" class="lightbox" hidden>
+  <button id="lightboxClose" class="lightbox-close" type="button" aria-label="Закрыть">✕</button>
+  <img id="lightboxImg" src="" alt="Фото товара" />
+</div>
+
+<script src="data/catalog.js"></script>
+<script src="js/item.js"></script>
+</body>
+</html>
