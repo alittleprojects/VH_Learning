@@ -135,7 +135,7 @@
     const relatedKind = isDevice ? "coil" : "device";
     const imageSrc = item.image ? toFullUrl(item.image) : "";
 
-    document.title = `${fullTitle} — VapeAcademy`;
+    document.title = `${fullTitle} — V&amp;H`;
 
     if (crumbs) {
       crumbs.innerHTML = `
@@ -277,7 +277,7 @@
   }
 
   function renderNotFound() {
-    document.title = "Товар не найден — VapeAcademy";
+    document.title = "Товар не найден — V&amp;H";
     if (crumbs) crumbs.innerHTML = `<a href="index.html">Каталог</a><span>/</span><b>Не найдено</b>`;
     root.innerHTML = `
       <div class="not-found reveal">
