@@ -256,25 +256,23 @@
     renderCompatChecks(selected, $("coilSearch").value);
   });
 
- function setPreview(img, src) {
+function setPreview(img, src) {
   if (!src) {
     img.removeAttribute("src");
     img.hidden = true;
     return;
   }
 
-  // Если путь относительный (начинается с images/) — подставляем базу GitHub
   let finalSrc = src;
+
+  // Если путь относительный — подставляем твой GitHub
   if (src.startsWith("images/")) {
-    // 👇 ЗАМЕНИ на свой ник и название репозитория
-    const GITHUB_BASE = "https://raw.githubusercontent.com/ТВОЙ-НИК/ТВОЙ-РЕПО/main/";
-    finalSrc = GITHUB_BASE + src;
+    finalSrc = "https://raw.githubusercontent.com/ilushka28/VH_Learning/main/" + src;
   }
 
   img.src = finalSrc;
   img.hidden = false;
 
-  // Если картинка не загрузилась — показываем ошибку
   img.onerror = () => {
     img.hidden = true;
     console.warn("Не удалось загрузить фото:", finalSrc);
