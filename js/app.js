@@ -82,14 +82,41 @@
   const compatibleCoils = (d) => (d.coils || []).map(coilById).filter(Boolean);
   const compatibleDevices = (c) => db.devices.filter((d) => (d.coils || []).includes(c.id));
 
+  // Превращает относительный путь images/... в полный URL GitHub
+  function toFullUrl(src) {
+    if (!src) return "";
+    // Если уже полный URL — возвращаем как есть
+    if (src.startsWith("http://") || src.startsWith("https://")) return src;
+    // Если относительный путь — подставляем GitHub
+    if (src.startsWith("images/")) {
+      return "https://raw.githubusercontent.com/ilushka28/VH_Learning/main/" + src;
+    }
+    return src;
+  }
+
   function imageBox(item, label) {
     const has = Boolean(item.image);
+    const fullUrl = has ? toFullUrl(item.image) : "";
     return `
       <div class="photo ${has ? "has" : ""}">
-        ${has ? `<img src="${esc(item.image)}" alt="${esc(label)}" onerror="this.closest('.photo').classList.remove('has');this.remove()">` : ""}
+        ${has ? `<img src="${esc(fullUrl)}" alt="${esc(label)}" onerror="this.closest('.photo').classList.remove('has');this.remove()">` : ""}
         <b>${esc(label)}</b>
       </div>
     `;
+  }
+
+  function setPreview(img, src) {
+    if (!src) {
+      img.removeAttribute("src");
+      img.hidden = true;
+      return;
+    }
+    img.src = toFullUrl(src);
+    img.hidden = false;
+    img.onerror = () => {
+      img.hidden = true;
+      console.warn("Не удалось загрузить фото:", img.src);
+    };
   }
 
   // ================= ВКЛАДКИ =================
@@ -255,29 +282,6 @@
     const selected = [...$("compatChecks").querySelectorAll("input:checked")].map((i) => i.value);
     renderCompatChecks(selected, $("coilSearch").value);
   });
-
-function setPreview(img, src) {
-  if (!src) {
-    img.removeAttribute("src");
-    img.hidden = true;
-    return;
-  }
-
-  let finalSrc = src;
-
-  // Если путь относительный — подставляем твой GitHub
-  if (src.startsWith("images/")) {
-    finalSrc = "https://raw.githubusercontent.com/ilushka28/VH_Learning/main/" + src;
-  }
-
-  img.src = finalSrc;
-  img.hidden = false;
-
-  img.onerror = () => {
-    img.hidden = true;
-    console.warn("Не удалось загрузить фото:", finalSrc);
-  };
-}
 
   // --- Форма устройства ---
   $("deviceSelect").addEventListener("change", () => {
