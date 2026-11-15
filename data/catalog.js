@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-15T17:59:57.503Z",
+    "updatedAt": "2026-11-15T19:15:02.274Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -317,12 +317,12 @@ window.CATALOG_DATA = {
     {
       "id": "dev-xros-pro",
       "brand": "Vaporesso",
-      "model": "XROS Pro",
+      "model": "XROS Pro 2",
       "type": "POD",
-      "price": 1890,
-      "description": "Продвинутая версия XROS. Экран, регулировка мощности.",
+      "price": 2690,
+      "description": "Будет потом",
       "popular": true,
-      "image": "images/devices/hgXN9Go-yCs.jpg",
+      "image": "",
       "coils": [
         "xros-04",
         "xros-06",
@@ -406,12 +406,12 @@ window.CATALOG_DATA = {
     {
       "id": "dev-vmate-e",
       "brand": "VOOPOO",
-      "model": "Vmate E",
+      "model": "Vmate i3",
       "type": "POD",
-      "popular": false,
-      "price": 1490,
-      "image": "",
+      "price": 1690,
       "description": "Бюджетная версия Vmate. Совместим с V.Thru картриджами.",
+      "popular": false,
+      "image": "",
       "coils": [
         "vthru-07",
         "vthru-12"
