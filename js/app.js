@@ -1,36 +1,46 @@
 (() => {
-  // ================= КОНСТАНТЫ =================
+  "use strict";
+
+  /* ================= КОНФИГ ================= */
   const STORAGE_KEY = "vape_academy_catalog_v6";
   const MISTAKES_KEY = "vape_academy_mistakes_v6";
+  const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ilushka28/VH_Learning/main/";
 
-  // ================= УТИЛИТЫ =================
+  /* ================= УТИЛИТЫ ================= */
   const $ = (id) => document.getElementById(id);
+  const on = (id, event, handler) => {
+    const node = $(id);
+    if (node) node.addEventListener(event, handler);
+    return node;
+  };
   const clone = (x) => JSON.parse(JSON.stringify(x));
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-  const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+  const shuffle = (arr) => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
   const sample = (arr, n) => shuffle(arr).slice(0, n);
-
   const esc = (s = "") => String(s).replace(/[&<>"']/g, (m) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
   }[m]));
-
   const money = (n) => {
-    const num = Number(n || 0);
-    return num ? `${num.toLocaleString("ru-RU")} ₽` : "цена не указана";
+    const v = Number(n || 0);
+    return v ? `${v.toLocaleString("ru-RU")} ₽` : "цена не указана";
   };
+  const uid = (p) => `${p}-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`;
 
-  const uid = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`;
-
-  // Безопасный доступ к элементам (возвращает null если нет)
-  const el = (id) => document.getElementById(id);
-
-  // ================= СОСТОЯНИЕ =================
+  /* ================= СОСТОЯНИЕ ================= */
   let db = loadDb();
   let view = "devices";
   let currentBrand = "Все";
+  let compatSelection = new Set(); // выбранные картриджи для устройства (не теряются при поиске)
   let quiz = { questions: [], index: 0, score: 0, answered: false };
 
-  // ================= РАБОТА С БАЗОЙ =================
+  /* ================= БАЗА ================= */
   function normalize(data) {
     data = data || {};
     data.meta = data.meta || {};
@@ -72,12 +82,12 @@
       db.meta.updatedAt = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
     } catch (e) {
-      alert("Не удалось сохранить. Возможно, переполнено хранилище браузера.");
+      toast("Не удалось сохранить: хранилище браузера переполнено.");
       console.error(e);
     }
   }
 
-  // ================= ХЕЛПЕРЫ =================
+  /* ================= ХЕЛПЕРЫ ================= */
   const coilById = (id) => db.coils.find((c) => c.id === id);
   const deviceById = (id) => db.devices.find((d) => d.id === id);
   const coilLabel = (c) => c ? `${c.brand} ${c.name} ${c.resistance || ""}`.trim() : "Неизвестный картридж";
@@ -87,76 +97,82 @@
 
   function toFullUrl(src) {
     if (!src) return "";
-    if (src.startsWith("http://") || src.startsWith("https://")) return src;
-    if (src.startsWith("images/")) {
-      return "https://raw.githubusercontent.com/ilushka28/VH_Learning/main/" + src;
-    }
+    if (/^https?:\/\//i.test(src)) return src;
+    if (src.startsWith("images/")) return GITHUB_RAW_BASE + src;
     return src;
   }
 
   function imageBox(item, label) {
-    const has = Boolean(item.image);
-    const fullUrl = has ? toFullUrl(item.image) : "";
+    const src = item.image ? toFullUrl(item.image) : "";
     return `
-      <div class="photo ${has ? "has" : ""}">
-        ${has ? `<img src="${esc(fullUrl)}" alt="${esc(label)}" onerror="this.closest('.photo').classList.remove('has');this.remove()">` : ""}
+      <div class="photo ${src ? "has" : ""}">
+        ${src ? `<img src="${esc(src)}" alt="${esc(label)}" loading="lazy" decoding="async"
+          onerror="this.closest('.photo').classList.remove('has');this.remove();">` : ""}
         <b>${esc(label)}</b>
-      </div>
-    `;
+      </div>`;
   }
 
   function setPreview(img, src) {
     if (!img) return;
-    if (!src) {
-      img.removeAttribute("src");
-      img.hidden = true;
-      return;
-    }
-    img.src = toFullUrl(src);
+    if (!src) { img.removeAttribute("src"); img.hidden = true; return; }
     img.hidden = false;
-    img.onerror = () => {
-      img.hidden = true;
-      console.warn("Не удалось загрузить фото:", img.src);
-    };
+    img.onerror = () => { img.hidden = true; };
+    img.src = toFullUrl(src);
   }
 
-  // ================= ВКЛАДКИ =================
+  /* ================= TOAST + ОТМЕНА ================= */
+  let toastTimer = null;
+  function toast(message, action) {
+    let node = $("vaToast");
+    if (!node) {
+      node = document.createElement("div");
+      node.id = "vaToast";
+      node.className = "toast";
+      document.body.appendChild(node);
+    }
+    node.innerHTML = `<span>${esc(message)}</span>` +
+      (action ? `<button class="toast-btn" type="button">${esc(action.label)}</button>` : "");
+    if (action) {
+      node.querySelector("button").addEventListener("click", () => { action.fn(); hideToast(); });
+    }
+    node.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, action ? 7000 : 2600);
+  }
+  function hideToast() {
+    const n = $("vaToast");
+    if (n) n.classList.remove("show");
+  }
+
+  /* ================= ВКЛАДКИ ================= */
   document.querySelectorAll(".tab").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
       document.querySelectorAll(".page").forEach((p) => { p.classList.remove("active"); p.hidden = true; });
       btn.classList.add("active");
-      const page = el(btn.dataset.tab);
-      if (page) {
-        page.hidden = false;
-        page.classList.add("active");
-      }
+      const page = $(btn.dataset.tab);
+      if (page) { page.hidden = false; page.classList.add("active"); }
     });
   });
 
-  // ================= КАТАЛОГ =================
-  const searchInput = el("searchInput");
-  const brandFilter = el("brandFilter");
-  const viewDevices = el("viewDevices");
-  const viewCoils = el("viewCoils");
-  const catalogStats = el("catalogStats");
-  const catalogGrid = el("catalogGrid");
+  /* ================= КАТАЛОГ ================= */
+  const searchInput = $("searchInput");
+  const brandFilter = $("brandFilter");
+  const catalogGrid = $("catalogGrid");
+  const catalogStats = $("catalogStats");
 
-  if (searchInput) searchInput.addEventListener("input", renderCatalog);
-  if (brandFilter) brandFilter.addEventListener("change", () => {
-    currentBrand = brandFilter.value;
-    renderCatalog();
-  });
-  if (viewDevices) viewDevices.addEventListener("click", () => {
+  on("searchInput", "input", renderCatalog);
+  on("brandFilter", "change", () => { currentBrand = brandFilter.value; renderCatalog(); });
+  on("viewDevices", "click", () => {
     view = "devices";
-    viewDevices.classList.add("active");
-    viewCoils?.classList.remove("active");
+    $("viewDevices")?.classList.add("active");
+    $("viewCoils")?.classList.remove("active");
     renderCatalog();
   });
-  if (viewCoils) viewCoils.addEventListener("click", () => {
+  on("viewCoils", "click", () => {
     view = "coils";
-    viewCoils.classList.add("active");
-    viewDevices?.classList.remove("active");
+    $("viewCoils")?.classList.add("active");
+    $("viewDevices")?.classList.remove("active");
     renderCatalog();
   });
 
@@ -177,12 +193,11 @@
 
   function renderCatalog() {
     if (!catalogGrid) return;
-    const q = searchInput?.value.trim().toLowerCase() || "";
+    const q = (searchInput?.value || "").trim().toLowerCase();
 
     if (view === "devices") {
       const list = db.devices.filter((d) => {
-        const coilText = compatibleCoils(d).map(coilLabel).join(" ");
-        const text = `${d.brand} ${d.model} ${d.type} ${d.price} ${d.description} ${coilText}`.toLowerCase();
+        const text = `${d.brand} ${d.model} ${d.type} ${d.price} ${d.description} ${compatibleCoils(d).map(coilLabel).join(" ")}`.toLowerCase();
         return (currentBrand === "Все" || d.brand === currentBrand) && (!q || text.includes(q));
       }).sort((a, b) => Number(b.popular) - Number(a.popular));
 
@@ -190,8 +205,7 @@
       catalogGrid.innerHTML = list.map(deviceCard).join("") || `<div class="empty">Ничего не найдено</div>`;
     } else {
       const list = db.coils.filter((c) => {
-        const devicesText = compatibleDevices(c).map(deviceLabel).join(" ");
-        const text = `${c.brand} ${c.name} ${c.resistance} ${c.type} ${c.price} ${c.description} ${devicesText}`.toLowerCase();
+        const text = `${c.brand} ${c.name} ${c.resistance} ${c.type} ${c.price} ${c.description} ${compatibleDevices(c).map(deviceLabel).join(" ")}`.toLowerCase();
         return (currentBrand === "Все" || c.brand === currentBrand) && (!q || text.includes(q));
       });
 
@@ -223,8 +237,7 @@
             </div>
           </div>
         </div>
-      </article>
-    `;
+      </article>`;
   }
 
   function coilCard(c) {
@@ -249,72 +262,70 @@
             </div>
           </div>
         </div>
-      </article>
-    `;
+      </article>`;
   }
 
-  // ================= АДМИНКА (только если есть элементы) =================
+  /* ================= АДМИНКА ================= */
+  const deviceSelect = $("deviceSelect");
+  const coilSelect = $("coilSelect");
+  const coilSearch = $("coilSearch");
+  const compatChecks = $("compatChecks");
+  const isAdminPage = Boolean(deviceSelect || coilSelect);
+
   function renderAdmin() {
-    const adminStats = el("adminStats");
-    const deviceSelect = el("deviceSelect");
-    const coilSelect = el("coilSelect");
+    if (!isAdminPage) return;
 
-    if (!deviceSelect && !coilSelect) return; // Админки нет на странице — выходим
-
-    if (adminStats) {
-      adminStats.textContent =
+    const stats = $("adminStats");
+    if (stats) {
+      stats.textContent =
         `В базе: ${db.devices.length} устройств, ${db.coils.length} испарителей. ` +
-        `Обновлено: ${db.meta.updatedAt || "не указано"}`;
+        `Обновлено: ${db.meta.updatedAt ? new Date(db.meta.updatedAt).toLocaleString("ru-RU") : "не указано"}`;
     }
 
     if (deviceSelect) {
-      deviceSelect.innerHTML =
-        `<option value="">— новое устройство —</option>` +
+      deviceSelect.innerHTML = `<option value="">— новое устройство —</option>` +
         db.devices.map((d) => `<option value="${esc(d.id)}">${esc(deviceLabel(d))}</option>`).join("");
     }
-
     if (coilSelect) {
-      coilSelect.innerHTML =
-        `<option value="">— новый испаритель / картридж —</option>` +
+      coilSelect.innerHTML = `<option value="">— новый испаритель / картридж —</option>` +
         db.coils.map((c) => `<option value="${esc(c.id)}">${esc(coilLabel(c))}</option>`).join("");
     }
 
-    renderCompatChecks([]);
     clearDeviceForm(false);
     clearCoilForm(false);
   }
 
-  function renderCompatChecks(selected = [], filter = "") {
-    const compatChecks = el("compatChecks");
+  function renderCompatChecks(filter = "") {
     if (!compatChecks) return;
-
     const f = filter.toLowerCase();
-    const list = db.coils.filter((c) => {
-      if (!f) return true;
-      return `${c.brand} ${c.name} ${c.resistance}`.toLowerCase().includes(f);
-    });
+    const list = db.coils.filter((c) =>
+      !f || `${c.brand} ${c.name} ${c.resistance}`.toLowerCase().includes(f)
+    );
 
     compatChecks.innerHTML = list.length
       ? list.map((c) => `
           <label>
-            <input type="checkbox" value="${esc(c.id)}" ${selected.includes(c.id) ? "checked" : ""}>
+            <input type="checkbox" value="${esc(c.id)}" ${compatSelection.has(c.id) ? "checked" : ""}>
             <span>${esc(c.name)} ${esc(c.resistance || "")}</span>
             <span class="coil-brand">${esc(c.brand)}</span>
-          </label>
-        `).join("")
+          </label>`).join("")
       : `<div class="muted">Картриджи не найдены. ${db.coils.length ? "Попробуй другой запрос." : "Сначала добавь картриджи."}</div>`;
   }
 
-  const coilSearch = el("coilSearch");
-  if (coilSearch) {
-    coilSearch.addEventListener("input", () => {
-      const selected = [...el("compatChecks").querySelectorAll("input:checked")].map((i) => i.value);
-      renderCompatChecks(selected, coilSearch.value);
+  if (compatChecks) {
+    compatChecks.addEventListener("change", (e) => {
+      const input = e.target.closest('input[type="checkbox"]');
+      if (!input) return;
+      if (input.checked) compatSelection.add(input.value);
+      else compatSelection.delete(input.value);
     });
   }
 
-  // --- Форма устройства ---
-  const deviceSelect = el("deviceSelect");
+  if (coilSearch) {
+    coilSearch.addEventListener("input", () => renderCompatChecks(coilSearch.value));
+  }
+
+  /* --- Форма устройства --- */
   if (deviceSelect) {
     deviceSelect.addEventListener("change", () => {
       const id = deviceSelect.value;
@@ -322,88 +333,75 @@
       const d = deviceById(id);
       if (!d) return;
 
-      el("dBrand").value = d.brand;
-      el("dModel").value = d.model;
-      el("dType").value = d.type;
-      el("dPrice").value = d.price || "";
-      el("dDescription").value = d.description || "";
-      el("dPopular").checked = Boolean(d.popular);
-      el("dImagePath").value = d.image || "";
-      setPreview(el("dPreview"), d.image);
+      $("dBrand").value = d.brand;
+      $("dModel").value = d.model;
+      $("dType").value = d.type;
+      $("dPrice").value = d.price || "";
+      $("dDescription").value = d.description || "";
+      $("dPopular").checked = Boolean(d.popular);
+      $("dImagePath").value = d.image || "";
+      setPreview($("dPreview"), d.image);
+      compatSelection = new Set(d.coils || []);
       if (coilSearch) coilSearch.value = "";
-      renderCompatChecks(d.coils || []);
+      renderCompatChecks();
     });
   }
 
-  const dImagePath = el("dImagePath");
-  if (dImagePath) {
-    dImagePath.addEventListener("input", () => {
-      setPreview(el("dPreview"), dImagePath.value.trim());
+  on("dImagePath", "input", () => setPreview($("dPreview"), $("dImagePath").value.trim()));
+
+  on("deviceForm", "submit", (e) => {
+    e.preventDefault();
+    const id = deviceSelect?.value || uid("dev");
+
+    const item = {
+      id,
+      brand: $("dBrand").value.trim(),
+      model: $("dModel").value.trim(),
+      type: $("dType").value.trim() || "POD",
+      price: Number($("dPrice").value || 0),
+      description: $("dDescription").value.trim(),
+      popular: $("dPopular").checked,
+      image: $("dImagePath").value.trim(),
+      coils: [...compatSelection]
+    };
+
+    const idx = db.devices.findIndex((d) => d.id === id);
+    if (idx >= 0) db.devices[idx] = item; else db.devices.push(item);
+
+    saveDb();
+    renderAll();
+    if (deviceSelect) {
+      deviceSelect.value = id;
+      deviceSelect.dispatchEvent(new Event("change"));
+    }
+    toast("Устройство сохранено");
+  });
+
+  on("newDevice", "click", () => clearDeviceForm(true));
+
+  on("deleteDevice", "click", () => {
+    const id = deviceSelect?.value;
+    if (!id) return toast("Выбери устройство для удаления.");
+    const snapshot = clone(db);
+    db.devices = db.devices.filter((d) => d.id !== id);
+    saveDb();
+    renderAll();
+    toast("Устройство удалено", {
+      label: "Отменить",
+      fn: () => { db = normalize(snapshot); saveDb(); renderAll(); }
     });
-  }
-
-  const deviceForm = el("deviceForm");
-  if (deviceForm) {
-    deviceForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const id = deviceSelect?.value || uid("dev");
-      const compatChecks = el("compatChecks");
-      const selectedCoils = compatChecks
-        ? [...compatChecks.querySelectorAll("input:checked")].map((i) => i.value)
-        : [];
-
-      const item = {
-        id,
-        brand: el("dBrand").value.trim(),
-        model: el("dModel").value.trim(),
-        type: el("dType").value.trim() || "POD",
-        price: Number(el("dPrice").value || 0),
-        description: el("dDescription").value.trim(),
-        popular: el("dPopular").checked,
-        image: el("dImagePath").value.trim(),
-        coils: selectedCoils
-      };
-
-      const idx = db.devices.findIndex((d) => d.id === id);
-      if (idx >= 0) db.devices[idx] = item;
-      else db.devices.push(item);
-
-      saveDb();
-      renderAll();
-      if (deviceSelect) {
-        deviceSelect.value = id;
-        deviceSelect.dispatchEvent(new Event("change"));
-      }
-    });
-  }
-
-  const newDevice = el("newDevice");
-  if (newDevice) newDevice.addEventListener("click", () => clearDeviceForm(true));
-
-  const deleteDevice = el("deleteDevice");
-  if (deleteDevice) {
-    deleteDevice.addEventListener("click", () => {
-      const id = deviceSelect?.value;
-      if (!id) return alert("Выбери устройство для удаления.");
-      if (!confirm("Удалить устройство?")) return;
-      db.devices = db.devices.filter((d) => d.id !== id);
-      saveDb();
-      renderAll();
-    });
-  }
+  });
 
   function clearDeviceForm(resetSelect = true) {
     if (resetSelect && deviceSelect) deviceSelect.value = "";
-    const form = el("deviceForm");
-    if (form) form.reset();
-    const preview = el("dPreview");
-    if (preview) preview.hidden = true;
+    $("deviceForm")?.reset();
+    const p = $("dPreview"); if (p) p.hidden = true;
+    compatSelection = new Set();
     if (coilSearch) coilSearch.value = "";
-    renderCompatChecks([]);
+    renderCompatChecks();
   }
 
-  // --- Форма испарителя ---
-  const coilSelect = el("coilSelect");
+  /* --- Форма испарителя --- */
   if (coilSelect) {
     coilSelect.addEventListener("change", () => {
       const id = coilSelect.value;
@@ -411,162 +409,150 @@
       const c = coilById(id);
       if (!c) return;
 
-      el("cBrand").value = c.brand;
-      el("cName").value = c.name;
-      el("cResistance").value = c.resistance;
-      el("cType").value = c.type;
-      el("cPrice").value = c.price || "";
-      el("cDescription").value = c.description || "";
-      el("cImagePath").value = c.image || "";
-      setPreview(el("cPreview"), c.image);
+      $("cBrand").value = c.brand;
+      $("cName").value = c.name;
+      $("cResistance").value = c.resistance;
+      $("cType").value = c.type;
+      $("cPrice").value = c.price || "";
+      $("cDescription").value = c.description || "";
+      $("cImagePath").value = c.image || "";
+      setPreview($("cPreview"), c.image);
     });
   }
 
-  const cImagePath = el("cImagePath");
-  if (cImagePath) {
-    cImagePath.addEventListener("input", () => {
-      setPreview(el("cPreview"), cImagePath.value.trim());
+  on("cImagePath", "input", () => setPreview($("cPreview"), $("cImagePath").value.trim()));
+
+  on("coilForm", "submit", (e) => {
+    e.preventDefault();
+    const id = coilSelect?.value || uid("coil");
+
+    const item = {
+      id,
+      brand: $("cBrand").value.trim(),
+      name: $("cName").value.trim(),
+      resistance: $("cResistance").value.trim(),
+      type: $("cType").value.trim() || "картридж",
+      price: Number($("cPrice").value || 0),
+      description: $("cDescription").value.trim(),
+      image: $("cImagePath").value.trim()
+    };
+
+    const idx = db.coils.findIndex((c) => c.id === id);
+    if (idx >= 0) db.coils[idx] = item; else db.coils.push(item);
+
+    saveDb();
+    renderAll();
+    if (coilSelect) {
+      coilSelect.value = id;
+      coilSelect.dispatchEvent(new Event("change"));
+    }
+    toast("Испаритель сохранён");
+  });
+
+  on("newCoil", "click", () => clearCoilForm(true));
+
+  on("deleteCoil", "click", () => {
+    const id = coilSelect?.value;
+    if (!id) return toast("Выбери испаритель для удаления.");
+    const snapshot = clone(db);
+    db.coils = db.coils.filter((c) => c.id !== id);
+    db.devices.forEach((d) => { d.coils = (d.coils || []).filter((cid) => cid !== id); });
+    saveDb();
+    renderAll();
+    toast("Испаритель удалён", {
+      label: "Отменить",
+      fn: () => { db = normalize(snapshot); saveDb(); renderAll(); }
     });
-  }
-
-  const coilForm = el("coilForm");
-  if (coilForm) {
-    coilForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const id = coilSelect?.value || uid("coil");
-
-      const item = {
-        id,
-        brand: el("cBrand").value.trim(),
-        name: el("cName").value.trim(),
-        resistance: el("cResistance").value.trim(),
-        type: el("cType").value.trim() || "картридж",
-        price: Number(el("cPrice").value || 0),
-        description: el("cDescription").value.trim(),
-        image: el("cImagePath").value.trim()
-      };
-
-      const idx = db.coils.findIndex((c) => c.id === id);
-      if (idx >= 0) db.coils[idx] = item;
-      else db.coils.push(item);
-
-      saveDb();
-      renderAll();
-      if (coilSelect) {
-        coilSelect.value = id;
-        coilSelect.dispatchEvent(new Event("change"));
-      }
-    });
-  }
-
-  const newCoil = el("newCoil");
-  if (newCoil) newCoil.addEventListener("click", () => clearCoilForm(true));
-
-  const deleteCoil = el("deleteCoil");
-  if (deleteCoil) {
-    deleteCoil.addEventListener("click", () => {
-      const id = coilSelect?.value;
-      if (!id) return alert("Выбери испаритель для удаления.");
-      if (!confirm("Удалить испаритель? Он будет убран из совместимости устройств.")) return;
-      db.coils = db.coils.filter((c) => c.id !== id);
-      db.devices.forEach((d) => { d.coils = (d.coils || []).filter((cid) => cid !== id); });
-      saveDb();
-      renderAll();
-    });
-  }
+  });
 
   function clearCoilForm(resetSelect = true) {
     if (resetSelect && coilSelect) coilSelect.value = "";
-    const form = el("coilForm");
-    if (form) form.reset();
-    const preview = el("cPreview");
-    if (preview) preview.hidden = true;
+    $("coilForm")?.reset();
+    const p = $("cPreview"); if (p) p.hidden = true;
   }
 
-  // --- Экспорт / Импорт / Сброс ---
-  const exportBtn = el("exportBtn");
-  if (exportBtn) {
-    exportBtn.addEventListener("click", () => {
-      db.meta.updatedAt = new Date().toISOString();
-      const content = `window.CATALOG_DATA = ${JSON.stringify(db, null, 2)};\n`;
-      const blob = new Blob([content], { type: "application/javascript;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "catalog.js";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-  }
+  /* --- Экспорт / Импорт / Сброс --- */
+  on("exportBtn", "click", () => {
+    db.meta.updatedAt = new Date().toISOString();
+    const content = `window.CATALOG_DATA = ${JSON.stringify(db, null, 2)};\n`;
+    const blob = new Blob([content], { type: "application/javascript;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "catalog.js";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("catalog.js экспортирован — загрузи его в папку data/ на GitHub");
+  });
 
-  const importFile = el("importFile");
-  if (importFile) {
-    importFile.addEventListener("change", async () => {
-      const file = importFile.files[0];
-      if (!file) return;
+  on("importFile", "change", async () => {
+    const file = $("importFile").files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      let parsed;
       try {
-        const text = await file.text();
-        let parsed;
-        try {
-          parsed = JSON.parse(text);
-        } catch {
-          const start = text.indexOf("=");
-          const end = text.lastIndexOf(";");
-          parsed = JSON.parse(text.slice(start + 1, end));
-        }
-        db = normalize(parsed);
-        saveDb();
-        renderAll();
-        alert("База импортирована.");
-      } catch (e) {
-        alert("Не удалось импортировать файл. Проверьте формат.");
-        console.error(e);
+        parsed = JSON.parse(text);
+      } catch {
+        const start = text.indexOf("=");
+        const end = text.lastIndexOf(";");
+        if (start === -1) throw new Error("Не найден объект базы");
+        parsed = JSON.parse(text.slice(start + 1, end === -1 ? undefined : end));
       }
-    });
-  }
-
-  const resetBtn = el("resetBtn");
-  if (resetBtn) {
-    resetBtn.addEventListener("click", () => {
-      if (!confirm("Сбросить локальные изменения и вернуть демо-базу?")) return;
-      localStorage.removeItem(STORAGE_KEY);
-      db = normalize(clone(window.CATALOG_DATA || { devices: [], coils: [] }));
+      db = normalize(parsed);
+      saveDb();
       renderAll();
-    });
+      toast("База импортирована");
+    } catch (e) {
+      toast("Не удалось импортировать файл. Проверь формат.");
+      console.error(e);
+    }
+  });
+
+  on("resetBtn", "click", () => {
+    if (!confirm("Сбросить локальные изменения и вернуть демо-базу?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    db = normalize(clone(window.CATALOG_DATA || { devices: [], coils: [] }));
+    compatSelection = new Set();
+    renderAll();
+    toast("База сброшена к демо-версии");
+  });
+
+  /* ================= ТРЕНАЖЁР ================= */
+  // Режим «Цены» убран по требованию — даже если option остался в HTML
+  const trainMode = $("trainMode");
+  if (trainMode) {
+    trainMode.querySelector('option[value="price"]')?.remove();
+    const desc = trainMode.closest(".panel")?.querySelector("p.muted");
+    if (desc) desc.textContent = "Проверка знаний: устройство → картридж и картридж → устройство.";
   }
 
-  // ================= ТРЕНАЖЁР =================
-  const startQuiz = el("startQuiz");
-  if (startQuiz) {
-    startQuiz.addEventListener("click", startQuizFn);
-  }
+  on("startQuiz", "click", startQuiz);
+  on("clearMistakes", "click", () => {
+    localStorage.removeItem(MISTAKES_KEY);
+    renderMistakes();
+    toast("История ошибок очищена");
+  });
 
-  const clearMistakes = el("clearMistakes");
-  if (clearMistakes) {
-    clearMistakes.addEventListener("click", () => {
-      localStorage.removeItem(MISTAKES_KEY);
-      renderMistakes();
-    });
-  }
-
-  function startQuizFn() {
-    const mode = el("trainMode")?.value || "mix";
-    const count = Number(el("trainCount")?.value || 10);
+  function startQuiz() {
+    const mode = trainMode?.value || "mix";
+    const count = Number($("trainCount")?.value || 10);
     const questions = [];
     for (let i = 0; i < count; i++) {
       const q = makeQuestion(mode);
       if (q) questions.push(q);
     }
+    if (!questions.length) return toast("Недостаточно данных для теста. Добавь устройства и картриджи.");
     quiz = { questions, index: 0, score: 0, answered: false };
     renderQuestion();
   }
 
   function makeQuestion(mode) {
-    const modes = ["device-coil", "coil-device", "price"];
+    const modes = ["device-coil", "coil-device"];
     const realMode = mode === "mix" ? pick(modes) : mode;
     if (realMode === "device-coil") return questionDeviceCoil();
     if (realMode === "coil-device") return questionCoilDevice();
-    return questionPrice();
+    return null;
   }
 
   function questionDeviceCoil() {
@@ -575,12 +561,11 @@
     const d = pick(devices);
     const correct = pick(compatibleCoils(d));
     const wrong = sample(db.coils.filter((c) => !(d.coils || []).includes(c.id)), 3);
-    const options = shuffle([correct, ...wrong]).map((c) => ({
-      id: c.id, label: `${coilLabel(c)} · ${money(c.price)}`
-    }));
     return {
       text: `Какой картридж подходит к ${deviceLabel(d)}?`,
-      options, correct: correct.id,
+      image: d.image,
+      options: shuffle([correct, ...wrong]).map((c) => ({ id: c.id, label: `${coilLabel(c)} · ${money(c.price)}` })),
+      correct: correct.id,
       explain: `Для ${deviceLabel(d)} подходят: ${compatibleCoils(d).map(coilLabel).join(", ")}.`
     };
   }
@@ -589,45 +574,27 @@
     const coils = db.coils.filter((c) => compatibleDevices(c).length);
     if (!coils.length || db.devices.length < 2) return null;
     const c = pick(coils);
-    const goodDevices = compatibleDevices(c);
-    const correct = pick(goodDevices);
+    const good = compatibleDevices(c);
+    const correct = pick(good);
     const wrong = sample(db.devices.filter((d) => !(d.coils || []).includes(c.id)), 3);
-    const options = shuffle([correct, ...wrong]).map((d) => ({ id: d.id, label: deviceLabel(d) }));
     return {
       text: `К какому устройству подходит ${coilLabel(c)}?`,
-      options, correct: correct.id,
-      explain: `${coilLabel(c)} подходит к: ${goodDevices.map(deviceLabel).join(", ")}.`
-    };
-  }
-
-  function questionPrice() {
-    const items = [
-      ...db.devices.map((d) => ({ id: d.id, label: deviceLabel(d), price: Number(d.price || 0), kind: "устройство" })),
-      ...db.coils.map((c) => ({ id: c.id, label: coilLabel(c), price: Number(c.price || 0), kind: "картридж" }))
-    ].filter((x) => x.price > 0);
-    if (items.length < 2) return null;
-    const correct = pick(items);
-    const otherPrices = [...new Set(items.filter((x) => x.price !== correct.price).map((x) => x.price))];
-    const prices = sample(otherPrices, 3);
-    while (prices.length < 3) {
-      const v = Math.max(10, correct.price + pick([-300, -200, -100, 100, 200, 300]));
-      if (v !== correct.price && !prices.includes(v)) prices.push(v);
-    }
-    const options = shuffle([correct.price, ...prices]).map((p) => ({ id: String(p), label: money(p) }));
-    return {
-      text: `Сколько стоит ${correct.label}?`,
-      options, correct: String(correct.price),
-      explain: `${correct.label} — ${correct.kind}. Цена: ${money(correct.price)}.`
+      image: c.image,
+      options: shuffle([correct, ...wrong]).map((d) => ({ id: d.id, label: deviceLabel(d) })),
+      correct: correct.id,
+      explain: `${coilLabel(c)} подходит к: ${good.map(deviceLabel).join(", ")}.`
     };
   }
 
   function renderQuestion() {
-    const box = el("quizBox");
+    const box = $("quizBox");
     if (!box) return;
+
     if (!quiz.questions.length) {
-      box.innerHTML = `<div class="question">Не удалось создать тест. Добавь данные в админке.</div>`;
+      box.innerHTML = `<div class="question">Нажми «Начать тест», чтобы проверить знания.</div>`;
       return;
     }
+
     if (quiz.index >= quiz.questions.length) {
       const p = Math.round((quiz.score / quiz.questions.length) * 100);
       box.innerHTML = `
@@ -635,21 +602,29 @@
           <h3>Тест завершён</h3>
           <p>Результат: <b>${quiz.score}</b> из <b>${quiz.questions.length}</b> (${p}%)</p>
           <p>${p >= 80 ? "✅ Отлично. Можно допускать к консультации." : "❌ Нужно повторить материал."}</p>
-        </div>
-      `;
+          <button id="retryQuiz" class="primary-btn" type="button">Пройти ещё раз</button>
+        </div>`;
+      $("retryQuiz")?.addEventListener("click", startQuiz);
       return;
     }
+
     const q = quiz.questions[quiz.index];
+    const progress = Math.round((quiz.index / quiz.questions.length) * 100);
     box.innerHTML = `
       <div class="question">
-        <div class="muted">Вопрос ${quiz.index + 1} из ${quiz.questions.length}</div>
+        <div class="quiz-top">
+          <span class="muted">Вопрос ${quiz.index + 1} из ${quiz.questions.length}</span>
+          <span class="pill">Счёт: ${quiz.score}</span>
+        </div>
+        <div class="quiz-bar"><i style="width:${progress}%"></i></div>
+        ${q.image ? `<div class="quiz-media"><img src="${esc(toFullUrl(q.image))}" alt=""
+          onerror="this.parentNode.remove();"></div>` : ""}
         <h3>${esc(q.text)}</h3>
         <div class="answers">
-          ${q.options.map((o) => `<button class="answer" data-id="${esc(o.id)}">${esc(o.label)}</button>`).join("")}
+          ${q.options.map((o) => `<button class="answer" type="button" data-id="${esc(o.id)}">${esc(o.label)}</button>`).join("")}
         </div>
         <div id="answerInfo"></div>
-      </div>
-    `;
+      </div>`;
     box.querySelectorAll(".answer").forEach((btn) => {
       btn.addEventListener("click", () => answerQuestion(btn.dataset.id));
     });
@@ -660,20 +635,20 @@
     quiz.answered = true;
     const q = quiz.questions[quiz.index];
     const ok = selectedId === q.correct;
-    if (ok) quiz.score++;
-    else addMistake(q);
+    if (ok) quiz.score++; else addMistake(q);
+
     document.querySelectorAll(".answer").forEach((btn) => {
       btn.disabled = true;
       if (btn.dataset.id === q.correct) btn.classList.add("right");
       if (btn.dataset.id === selectedId && !ok) btn.classList.add("wrong");
     });
-    const info = el("answerInfo");
+
+    const info = $("answerInfo");
     if (info) {
       info.innerHTML = `
         <div class="explain"><b>${ok ? "Верно." : "Ошибка."}</b> ${esc(q.explain)}</div>
-        <br><button id="nextQuestion" class="primary-btn">Дальше</button>
-      `;
-      el("nextQuestion")?.addEventListener("click", () => {
+        <br><button id="nextQuestion" class="primary-btn" type="button">Дальше</button>`;
+      $("nextQuestion")?.addEventListener("click", () => {
         quiz.index++;
         quiz.answered = false;
         renderQuestion();
@@ -694,23 +669,20 @@
   }
 
   function renderMistakes() {
-    const box = el("mistakesBox");
+    const box = $("mistakesBox");
     if (!box) return;
     const mistakes = getMistakes();
-    if (!mistakes.length) {
-      box.innerHTML = `<p class="muted">Ошибок пока нет.</p>`;
-      return;
-    }
-    box.innerHTML = mistakes.map((m) => `
-      <div class="mistake">
-        <b>${esc(m.text)}</b>
-        <p>${esc(m.explain)}</p>
-        <small class="muted">${esc(m.date)}</small>
-      </div>
-    `).join("");
+    box.innerHTML = mistakes.length
+      ? mistakes.map((m) => `
+          <div class="mistake">
+            <b>${esc(m.text)}</b>
+            <p>${esc(m.explain)}</p>
+            <small class="muted">${esc(m.date)}</small>
+          </div>`).join("")
+      : `<p class="muted">Ошибок пока нет.</p>`;
   }
 
-  // ================= ЗАПУСК =================
+  /* ================= ЗАПУСК ================= */
   function renderAll() {
     renderBrandFilter();
     renderCatalog();
