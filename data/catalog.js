@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-17T19:50:06.580Z",
+    "updatedAt": "2026-11-17T19:55:28.895Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -12,8 +12,8 @@ window.CATALOG_DATA = {
       "resistance": "0.4Ω",
       "type": "картридж",
       "price": 490,
-      "image": "",
-      "description": "Сетчатый испаритель. Для свободной затяжки, сладкие и фруктовые жидкости."
+      "description": "Сетчатый испаритель. Для свободной затяжки, сладкие и фруктовые жидкости.",
+      "image": "images/coils/xros_0.4.jpg"
     },
     {
       "id": "xros-06",
@@ -600,19 +600,6 @@ window.CATALOG_DATA = {
       "coils": [
         "lost-ursa-08",
         "lost-ursa-10"
-      ]
-    },
-    {
-      "id": "dev-orion",
-      "brand": "Lost Vape",
-      "model": "Orion",
-      "type": "POD",
-      "popular": true,
-      "price": 1590,
-      "image": "",
-      "description": "Orion-картриджи. НЕ совместимы с Ursa!",
-      "coils": [
-        "lost-orion-08"
       ]
     },
     {
