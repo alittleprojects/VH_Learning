@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-17T19:31:36.098Z",
+    "updatedAt": "2026-11-17T19:44:58.765Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -345,7 +345,7 @@ window.CATALOG_DATA = {
       "price": 1690,
       "description": "Топ-продаж. Регулировка обдува, Type-C, 1000 мАч. Подходят картриджи XROS Series.",
       "popular": true,
-      "image": "images/devices/xros4.png",
+      "image": "images/devices/xros4.jpg",
       "coils": [
         "xros-04",
         "xros-06",
@@ -693,6 +693,76 @@ window.CATALOG_DATA = {
         "geek-b-04",
         "geek-b-06",
         "coil-1794943497691-ce1eb"
+      ]
+    },
+    {
+      "id": "dev-1794944548416-71805",
+      "brand": "Vaporesso",
+      "model": "XROS 4 mini",
+      "type": "POD",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "",
+      "coils": [
+        "xros-04",
+        "xros-06",
+        "coil-1794770397313-046f7",
+        "xros-08",
+        "xros-10",
+        "xros-12"
+      ]
+    },
+    {
+      "id": "dev-1794944589447-f85c9",
+      "brand": "Vaporesso",
+      "model": "XROS Pro",
+      "type": "POD",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "",
+      "coils": [
+        "xros-04",
+        "xros-06",
+        "coil-1794770397313-046f7",
+        "xros-08",
+        "xros-10",
+        "xros-12"
+      ]
+    },
+    {
+      "id": "dev-1794944624309-b8603",
+      "brand": "Vaporesso",
+      "model": "XROS 3",
+      "type": "POD",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "",
+      "coils": [
+        "xros-12",
+        "xros-10",
+        "xros-08",
+        "coil-1794770397313-046f7",
+        "xros-06"
+      ]
+    },
+    {
+      "id": "dev-1794944645479-dadca",
+      "brand": "Vaporesso",
+      "model": "XROS 3 mini",
+      "type": "POD",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "",
+      "coils": [
+        "xros-06",
+        "coil-1794770397313-046f7",
+        "xros-08",
+        "xros-10",
+        "xros-12"
       ]
     }
   ]
