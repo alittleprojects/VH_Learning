@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-17T19:55:28.895Z",
+    "updatedAt": "2026-11-17T20:08:06.613Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -11,7 +11,7 @@ window.CATALOG_DATA = {
       "name": "XROS Series Cartridge",
       "resistance": "0.4Ω",
       "type": "картридж",
-      "price": 490,
+      "price": 370,
       "description": "Сетчатый испаритель. Для свободной затяжки, сладкие и фруктовые жидкости.",
       "image": "images/coils/xros_0.4.jpg"
     },
@@ -21,9 +21,9 @@ window.CATALOG_DATA = {
       "name": "XROS Series Cartridge",
       "resistance": "0.6Ω",
       "type": "картридж",
-      "price": 450,
-      "image": "",
-      "description": "Универсальный. Подходит для MTL и полу-свободной затяжки."
+      "price": 370,
+      "description": "Универсальный. Подходит для MTL и полу-свободной затяжки.",
+      "image": ""
     },
     {
       "id": "xros-08",
@@ -31,9 +31,9 @@ window.CATALOG_DATA = {
       "name": "XROS Series Cartridge",
       "resistance": "0.8Ω",
       "type": "картридж",
-      "price": 450,
-      "image": "",
-      "description": "Классическая сигаретная затяжка. Для солевых жидкостей 10-20 мг."
+      "price": 370,
+      "description": "Классическая сигаретная затяжка. Для солевых жидкостей 10-20 мг.",
+      "image": ""
     },
     {
       "id": "xros-10",
@@ -41,9 +41,9 @@ window.CATALOG_DATA = {
       "name": "XROS Series Cartridge",
       "resistance": "1.0Ω",
       "type": "картридж",
-      "price": 450,
-      "image": "",
-      "description": "Тугая MTL-затяжка. Для крепких солевых жидкостей 20 мг."
+      "price": 370,
+      "description": "Тугая MTL-затяжка. Для крепких солевых жидкостей 20 мг.",
+      "image": ""
     },
     {
       "id": "xros-12",
@@ -51,9 +51,9 @@ window.CATALOG_DATA = {
       "name": "XROS Series Cartridge",
       "resistance": "1.2Ω",
       "type": "картридж",
-      "price": 450,
-      "image": "",
-      "description": "Самая тугая затяжка. Максимальная экономия жидкости."
+      "price": 370,
+      "description": "Самая тугая затяжка. Максимальная экономия жидкости.",
+      "image": ""
     },
     {
       "id": "luxe-q-08",
