@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-17T19:27:27.021Z",
+    "updatedAt": "2026-11-17T19:31:36.098Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -661,6 +661,39 @@ window.CATALOG_DATA = {
       "popular": false,
       "image": "",
       "coils": []
+    },
+    {
+      "id": "dev-1794943734184-2fa2d",
+      "brand": "GeekVape",
+      "model": "Hero 5",
+      "type": "Pod-Mod",
+      "price": 2590,
+      "description": "",
+      "popular": false,
+      "image": "",
+      "coils": [
+        "coil-1794943395917-284f3",
+        "coil-1794943456151-efcb1",
+        "geek-b-04",
+        "geek-b-06",
+        "coil-1794943497691-ce1eb"
+      ]
+    },
+    {
+      "id": "dev-1794943836968-fe1b5",
+      "brand": "GeekVape",
+      "model": "H45/Hero2",
+      "type": "Pod-Mod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "",
+      "coils": [
+        "coil-1794943456151-efcb1",
+        "geek-b-04",
+        "geek-b-06",
+        "coil-1794943497691-ce1eb"
+      ]
     }
   ]
 };
