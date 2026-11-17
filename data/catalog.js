@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-16T20:36:18.709Z",
+    "updatedAt": "2026-11-17T19:27:27.021Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -306,10 +306,30 @@ window.CATALOG_DATA = {
       "image": ""
     },
     {
-      "id": "coil-1794771034791-25ab6",
+      "id": "coil-1794943395917-284f3",
       "brand": "GeekVape",
       "name": "B Series",
-      "resistance": "0.2",
+      "resistance": "0.2Ω",
+      "type": "испаритель",
+      "price": 370,
+      "description": "",
+      "image": ""
+    },
+    {
+      "id": "coil-1794943456151-efcb1",
+      "brand": "GeekVape",
+      "name": "B Series",
+      "resistance": "0.3Ω",
+      "type": "испаритель",
+      "price": 370,
+      "description": "",
+      "image": ""
+    },
+    {
+      "id": "coil-1794943497691-ce1eb",
+      "brand": "GeekVape",
+      "name": "B Series",
+      "resistance": "1.2Ω",
       "type": "испаритель",
       "price": 370,
       "description": "",
@@ -459,14 +479,16 @@ window.CATALOG_DATA = {
       "brand": "GeekVape",
       "model": "B60 / Aegis Boost 2",
       "type": "Pod-Mod",
-      "popular": true,
       "price": 2690,
-      "image": "",
       "description": "Защищённый Pod-Mod. B-Series испарители.",
+      "popular": true,
+      "image": "",
       "coils": [
         "geek-b-04",
         "geek-b-06",
-        "coil-1794771034791-25ab6"
+        "coil-1794943395917-284f3",
+        "coil-1794943456151-efcb1",
+        "coil-1794943497691-ce1eb"
       ]
     },
     {
@@ -474,13 +496,15 @@ window.CATALOG_DATA = {
       "brand": "GeekVape",
       "model": "H45 Classic",
       "type": "Pod-Mod",
-      "popular": false,
       "price": 2390,
-      "image": "",
       "description": "Компактный Pod-Mod с B-Series.",
+      "popular": false,
+      "image": "",
       "coils": [
         "geek-b-04",
-        "geek-b-06"
+        "geek-b-06",
+        "coil-1794943456151-efcb1",
+        "coil-1794943497691-ce1eb"
       ]
     },
     {
@@ -599,7 +623,7 @@ window.CATALOG_DATA = {
       "price": 2890,
       "description": "",
       "popular": false,
-      "image": "",
+      "image": "images/devices/xros 6.png",
       "coils": [
         "xros-10",
         "xros-12",
