@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-17T20:08:06.613Z",
+    "updatedAt": "2026-11-18T19:56:38.731Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -23,7 +23,7 @@ window.CATALOG_DATA = {
       "type": "картридж",
       "price": 370,
       "description": "Универсальный. Подходит для MTL и полу-свободной затяжки.",
-      "image": ""
+      "image": "images/coils/xros_0.6.jpeg"
     },
     {
       "id": "xros-08",
@@ -33,7 +33,7 @@ window.CATALOG_DATA = {
       "type": "картридж",
       "price": 370,
       "description": "Классическая сигаретная затяжка. Для солевых жидкостей 10-20 мг.",
-      "image": ""
+      "image": "images/coils/xros_0.8.png"
     },
     {
       "id": "xros-10",
@@ -43,7 +43,7 @@ window.CATALOG_DATA = {
       "type": "картридж",
       "price": 370,
       "description": "Тугая MTL-затяжка. Для крепких солевых жидкостей 20 мг.",
-      "image": ""
+      "image": "images/coils/xros_1.0.png"
     },
     {
       "id": "xros-12",
@@ -53,7 +53,7 @@ window.CATALOG_DATA = {
       "type": "картридж",
       "price": 370,
       "description": "Самая тугая затяжка. Максимальная экономия жидкости.",
-      "image": ""
+      "image": "images/coils/xros_1.2.jpeg"
     },
     {
       "id": "luxe-q-08",
@@ -303,7 +303,7 @@ window.CATALOG_DATA = {
       "type": "картридж",
       "price": 370,
       "description": "",
-      "image": ""
+      "image": "images/coils/xros_0.7.jpeg"
     },
     {
       "id": "coil-1794943395917-284f3",
@@ -332,6 +332,16 @@ window.CATALOG_DATA = {
       "resistance": "1.2Ω",
       "type": "испаритель",
       "price": 370,
+      "description": "",
+      "image": ""
+    },
+    {
+      "id": "coil-1795029965989-611b2",
+      "brand": "VOOPOO",
+      "name": "V.Thru / Vmate Cartridge",
+      "resistance": "0.4Ω",
+      "type": "картридж",
+      "price": 360,
       "description": "",
       "image": ""
     }
@@ -386,7 +396,8 @@ window.CATALOG_DATA = {
         "xros-06",
         "xros-08",
         "xros-10",
-        "xros-12"
+        "xros-12",
+        "coil-1794770397313-046f7"
       ]
     },
     {
@@ -456,7 +467,8 @@ window.CATALOG_DATA = {
       "image": "",
       "coils": [
         "vthru-07",
-        "vthru-12"
+        "vthru-12",
+        "coil-1795029965989-611b2"
       ]
     },
     {
@@ -479,7 +491,7 @@ window.CATALOG_DATA = {
       "brand": "GeekVape",
       "model": "B60 / Aegis Boost 2",
       "type": "Pod-Mod",
-      "price": 2690,
+      "price": 0,
       "description": "Защищённый Pod-Mod. B-Series испарители.",
       "popular": true,
       "image": "",
@@ -518,19 +530,6 @@ window.CATALOG_DATA = {
       "description": "Бюджетный POD.",
       "coils": [
         "rincoe-manto-08"
-      ]
-    },
-    {
-      "id": "dev-jellybox-nano",
-      "brand": "Rincoe",
-      "model": "Jellybox Nano",
-      "type": "POD",
-      "popular": false,
-      "price": 1290,
-      "image": "",
-      "description": "Прозрачный корпус.",
-      "coils": [
-        "rincoe-jelly-10"
       ]
     },
     {
@@ -739,6 +738,23 @@ window.CATALOG_DATA = {
       "id": "dev-1794944645479-dadca",
       "brand": "Vaporesso",
       "model": "XROS 3 mini",
+      "type": "POD",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "",
+      "coils": [
+        "xros-06",
+        "coil-1794770397313-046f7",
+        "xros-08",
+        "xros-10",
+        "xros-12"
+      ]
+    },
+    {
+      "id": "dev-1795029847448-bf90d",
+      "brand": "Vaporesso",
+      "model": "XROS Cube",
       "type": "POD",
       "price": 0,
       "description": "",
