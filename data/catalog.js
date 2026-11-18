@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-18T19:56:38.731Z",
+    "updatedAt": "2026-11-18T20:54:40.337Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -689,7 +689,7 @@ window.CATALOG_DATA = {
       "price": 0,
       "description": "",
       "popular": false,
-      "image": "",
+      "image": "images/devices/XROS4MINI-black.png",
       "coils": [
         "xros-04",
         "xros-06",
@@ -759,7 +759,7 @@ window.CATALOG_DATA = {
       "price": 0,
       "description": "",
       "popular": false,
-      "image": "",
+      "image": "images/devices/xroscube.jpg",
       "coils": [
         "xros-06",
         "coil-1794770397313-046f7",
