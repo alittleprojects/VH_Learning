@@ -8,6 +8,41 @@
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
+  /* ================= РЕДКИЙ ТАЙМЕР · 11–20 МИНУТ ================= */
+  const GAP_MIN = 11 * 60 * 1000;
+  const GAP_MAX = 20 * 60 * 1000;
+  const STORE_KEY = "vh_peek_next_v1";
+
+  const store = (() => {
+    let mem = 0;
+    const backends = [];
+    try { localStorage.setItem("__pk", "1"); localStorage.removeItem("__pk"); backends.push(localStorage); } catch {}
+    try { sessionStorage.setItem("__pk", "1"); sessionStorage.removeItem("__pk"); backends.push(sessionStorage); } catch {}
+    return {
+      get() {
+        for (const b of backends) {
+          try {
+            const v = Number(b.getItem(STORE_KEY));
+            if (Number.isFinite(v) && v > 0) return v;
+          } catch {}
+        }
+        return mem;
+      },
+      set(v) {
+        mem = v;
+        for (const b of backends) { try { b.setItem(STORE_KEY, String(v)); } catch {} }
+      }
+    };
+  })();
+
+  const newDeadline = () => {
+    const t = Date.now() + rnd(GAP_MIN, GAP_MAX);
+    store.set(t);
+    return t;
+  };
+
+  let nextAt = store.get() || newDeadline();
+
   /* ================= ПЕРСОНАЖ ================= */
   const SVG = `
   <svg viewBox="0 0 300 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -143,7 +178,6 @@
   /* ================= ССЫЛКИ ================= */
   const $ = (id) => document.getElementById(id);
   const slot = $("pkSlot"), move = $("pkMove"), rot = $("pkRot"), say = $("pkSay");
-  const svg = slot.querySelector("svg");
   const gHead = $("pkHead"), gArmL = $("pkArmL"), gArmR = $("pkArmR"), gHand = $("pkHandR");
   const gVape = $("pkBentVape"), gFace = $("pkBentFace"), gThumb = $("pkThumb");
   const gVapor = $("pkVapor"), gMouth = $("pkMouth"), gRoot = $("pkRoot");
@@ -243,6 +277,7 @@
   function resetPose() {
     clearAnims();
     [gHead, gArmL, gArmR, gHand, gRoot].forEach((el) => el && (el.style.transform = ""));
+    gArmR.style.opacity = "";
     gVape.setAttribute("opacity", "0");
     gFace.setAttribute("opacity", "0");
     gThumb.setAttribute("opacity", "0");
@@ -325,7 +360,6 @@
       gArmR.style.opacity = "0";
       gVape.setAttribute("opacity", "1");
       await anim(gVape, [{ opacity: 0, transform: "translateY(12px)" }, { opacity: 1, transform: "translateY(0)" }], { duration: 340 });
-      await anim(gMouth, [{ d: "M136,168 Q150,175 164,168" }, { d: "M138,166 Q150,182 162,166" }], { duration: 260 }).catch(() => {});
       await wait(420);
       gVapor.setAttribute("opacity", "1");
       puffs.forEach((p, i) => {
@@ -371,7 +405,7 @@
     say.style.top = clamp(y, 26, vh - 26) + "px";
   }
 
-  /* ================= ЦИКЛ ПОЯВЛЕНИЯ ================= */
+  /* ================= ПОЯВЛЕНИЕ ================= */
   let timer = 0, busy = false, alive = true;
 
   function blocked() {
@@ -444,20 +478,34 @@
     resetPose();
   }
 
-  function schedule(first) {
+  /* ================= ПЛАНИРОВЩИК ================= */
+  function arm() {
     clearTimeout(timer);
-    if (!alive) return;
-    const gap = reduced ? rnd(26000, 44000) : first ? rnd(4000, 8000) : rnd(11000, 22000);
-    timer = setTimeout(tick, gap);
+    if (!alive || document.hidden) return;
+    const stored = store.get();
+    if (stored && Math.abs(stored - nextAt) > 1500) nextAt = stored;
+    const remain = nextAt - Date.now();
+    const delay = remain > 0 ? remain : rnd(6000, 16000);
+    timer = setTimeout(tick, clamp(delay, 1200, 2147483647));
   }
 
   async function tick() {
     if (!alive) return;
-    if (busy || blocked()) { schedule(); return; }
+
+    const stored = store.get();
+    if (stored && stored - Date.now() > 2000) { nextAt = stored; arm(); return; }
+
+    if (busy || blocked()) {
+      clearTimeout(timer);
+      timer = setTimeout(tick, rnd(25000, 45000));
+      return;
+    }
+
     busy = true;
     try { await appear(); } catch {}
     busy = false;
-    schedule();
+    nextAt = newDeadline();
+    arm();
   }
 
   document.addEventListener("visibilitychange", () => {
@@ -467,21 +515,30 @@
       slot.style.opacity = "0";
       busy = false;
     } else {
-      schedule(true);
+      arm();
     }
   });
 
+  window.addEventListener("storage", (e) => {
+    if (e.key !== STORE_KEY) return;
+    const v = Number(e.newValue);
+    if (Number.isFinite(v) && v > 0 && Math.abs(v - nextAt) > 1500) { nextAt = v; arm(); }
+  });
+
   window.addEventListener("pagehide", () => {
-    alive = false;
     clearTimeout(timer);
     resetPose();
+    slot.style.opacity = "0";
   });
+
+  window.addEventListener("pageshow", () => { if (alive) arm(); });
 
   window.VHPeeker = {
     stop() { alive = false; clearTimeout(timer); resetPose(); slot.style.opacity = "0"; },
-    start() { if (!alive) { alive = true; schedule(true); } },
-    now() { if (!busy && !blocked()) tick(); }
+    start() { if (!alive) { alive = true; arm(); } },
+    now() { if (!busy && !blocked()) { nextAt = Date.now(); store.set(nextAt); tick(); } },
+    nextIn() { return Math.max(0, nextAt - Date.now()); }
   };
 
-  schedule(true);
+  arm();
 })();
