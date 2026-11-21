@@ -476,13 +476,10 @@
   document.querySelectorAll('.tab[data-tab="catalog"]').forEach((b) => b.addEventListener("click", () => setTimeout(() => { idxRev = -1; render(); measure(); }, 0)));
 
   /* ---------- липкие отступы ---------- */
-   let lastCols = 0;
-  function measure() {
+   function measure() {
     const t = document.querySelector(".tabs");
     root.style.setProperty("--tabs", (t ? Math.round(t.getBoundingClientRect().height) : 0) + "px");
     root.style.setProperty("--bar", Math.round($("btBar").getBoundingClientRect().height) + "px");
-    const c = featCols();
-    if (c !== lastCols) { lastCols = c; if (showcase()) render(); }
   }
   const ro = new ResizeObserver(() => P ? P.frame(measure) : measure());
   const io = new IntersectionObserver((en) => {
