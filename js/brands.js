@@ -45,11 +45,16 @@
     });
     return out;
   }
+  const plural = (n) => {
+    const m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return "ПОЗИЦИЯ";
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return "ПОЗИЦИИ";
+    return "ПОЗИЦИЙ";
+  };
 
   const readDb = () => P ? P.db() : (() => { try { return JSON.parse(localStorage.getItem("vape_academy_catalog_v6")) || window.CATALOG_DATA; } catch { return window.CATALOG_DATA || { devices: [], coils: [] }; } })();
   let db = readDb();
 
-  /* ---------- индекс: строки строятся один раз на ревизию базы ---------- */
   let IDX = { devices: [], coils: [] }, idxRev = -1;
   function buildIndex() {
     const rev = P ? P.rev : Math.random();
@@ -84,9 +89,8 @@
     cardCache.clear(); rowCache.clear(); tileRev = -1;
   }
 
-  /* ---------- состояние ---------- */
   const DEF = { brand: null, kind: "devices", q: "", sort: "az", view: "grid", hit: false };
-  let S = { ...DEF }, limit = PAGE, tileRev = -1, lastQ = null;
+  let S = { ...DEF }, limit = PAGE, tileRev = -1;
   let prefs = { kind: "devices", sort: "az", view: "grid" };
   try { const p = JSON.parse(localStorage.getItem(PREF_KEY) || "{}"); ["kind", "sort", "view"].forEach((k) => { if (p[k] !== undefined) prefs[k] = p[k]; }); } catch {}
   Object.assign(S, prefs);
@@ -94,7 +98,6 @@
   const pool = () => IDX[S.kind];
   const showcase = () => !S.brand && !S.q.trim();
 
-  /* ---------- каркас ---------- */
   [...host.children].forEach((n) => { n.hidden = true; n.dataset.btLegacy = "1"; });
   const root = document.createElement("div");
   root.id = "btRoot"; root.className = "bt-root";
@@ -145,7 +148,15 @@
     </div>`;
   host.appendChild(root);
 
-  /* ---------- фабрики узлов с переиспользованием ---------- */
+  const featCss = document.createElement("style");
+  featCss.id = "btFeatCss";
+  featCss.textContent = `
+    #btFeat{grid-template-columns:repeat(4,1fr)}
+    @media (max-width:820px){#btFeat{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:420px){#btFeat{grid-template-columns:1fr}}
+  `;
+  document.head.appendChild(featCss);
+
   const cardCache = new Map(), rowCache = new Map(), tileCache = new Map();
 
   function makeCard(e) {
@@ -201,7 +212,6 @@
     while (box.children.length > nodes.length) box.removeChild(box.lastElementChild);
   }
 
-  /* ---------- выборка ---------- */
   const CMP = {
     az: (a, b) => a.key.localeCompare(b.key, "ru"),
     za: (a, b) => b.key.localeCompare(a.key, "ru"),
@@ -234,7 +244,11 @@
     return [...map.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ru"));
   }
 
-  /* ---------- отрисовка ---------- */
+  function featCols() {
+    if (matchMedia("(max-width:420px)").matches) return 1;
+    return matchMedia("(max-width:820px)").matches ? 2 : 4;
+  }
+
   function render() {
     buildIndex();
     const k = S.kind, unit = k === "devices" ? "УСТРОЙСТВ" : "КАРТРИДЖЕЙ";
@@ -305,14 +319,22 @@
         reconcile($("btBrands"), nodes);
       }
 
-      const feat = (k === "devices" ? IDX.devices.filter((x) => x.popular) : IDX.coils).slice(0, 3);
-      const f = feat.length ? feat : pool().slice(0, 3);
+      const cols = featCols();
+      lastCols = cols;
+      const hits = pool().filter((x) => x.popular);
+      let f = hits.slice(0, cols);
+      if (f.length < cols) {
+        const rest = pool().filter((x) => !x.popular).sort((a, b) => b.n - a.n || b.fresh - a.fresh);
+        f = f.concat(rest.slice(0, cols - f.length));
+      }
       $("btSecHead").hidden = !f.length;
-      $("btSecTitle").textContent = k === "devices" ? "ХИТЫ ПРОДАЖ" : "ПОПУЛЯРНЫЕ КАРТРИДЖИ";
-      $("btSecCount").textContent = `${f.length} ПОЗИЦИИ`;
+      const topped = f.length > hits.length;
+      $("btSecTitle").textContent = k === "devices"
+        ? (topped ? "ХИТЫ И РЕКОМЕНДУЕМЫЕ" : "ХИТЫ ПРОДАЖ")
+        : "ПОПУЛЯРНЫЕ КАРТРИДЖИ";
+      $("btSecCount").textContent = `${f.length} ${plural(f.length)}`;
       const fn = f.map((e) => { const n = getCard(e); highlight(n, e, "", false); return n; });
       reconcile($("btFeat"), fn);
-      lastQ = "";
       return;
     }
 
@@ -354,13 +376,11 @@
       if (grid) $("btRows").textContent = "";
       else $("btGrid").textContent = "";
     }
-    lastQ = S.q;
 
     $("btMore").hidden = shown >= list.length;
     if (shown < list.length) $("btMoreB").textContent = `ПОКАЗАТЬ ЕЩЁ ${Math.min(PAGE, list.length - shown)} · ОСТАЛОСЬ ${list.length - shown}`;
   }
 
-  /* ---------- история ---------- */
   const SORTS = ["az", "za", "cheap", "rich", "hot", "fresh", "links", "ohm"];
   const depth = () => { const s = history.state; return s && typeof s.btDepth === "number" ? s.btDepth : 0; };
   function hashString() {
@@ -417,7 +437,6 @@
   }
   function update(reset = true) { if (reset) limit = PAGE; render(); syncHash(false); }
 
-  /* ---------- тост ---------- */
   let tT = 0;
   function toast(text) {
     let n = $("btToast");
@@ -432,7 +451,6 @@
     clearTimeout(tT); tT = setTimeout(() => { n.style.opacity = "0"; n.style.transform = "translate(-50%,20px)"; }, 2200);
   }
 
-  /* ---------- события ---------- */
   let qT = 0;
   $("btQ").addEventListener("input", (e) => {
     const v = e.target.value;
@@ -464,7 +482,6 @@
   });
   window.addEventListener("popstate", () => { applyHash(); render(); measure(); });
 
-  /* ---------- живая база ---------- */
   function onDb() {
     idxRev = -1;
     buildIndex();
@@ -475,11 +492,13 @@
   if (!P) window.addEventListener("storage", (e) => { if (e.key === "vape_academy_catalog_v6") onDb(); });
   document.querySelectorAll('.tab[data-tab="catalog"]').forEach((b) => b.addEventListener("click", () => setTimeout(() => { idxRev = -1; render(); measure(); }, 0)));
 
-  /* ---------- липкие отступы ---------- */
-   function measure() {
+  let lastCols = 0;
+  function measure() {
     const t = document.querySelector(".tabs");
     root.style.setProperty("--tabs", (t ? Math.round(t.getBoundingClientRect().height) : 0) + "px");
     root.style.setProperty("--bar", Math.round($("btBar").getBoundingClientRect().height) + "px");
+    const c = featCols();
+    if (c !== lastCols) { lastCols = c; if (showcase()) render(); }
   }
   const ro = new ResizeObserver(() => P ? P.frame(measure) : measure());
   const io = new IntersectionObserver((en) => {
@@ -494,7 +513,6 @@
   window.addEventListener("pageshow", (e) => { attach(); if (e.persisted) { idxRev = -1; applyHash(); render(); measure(); } });
   window.addEventListener("pagehide", () => { clearTimeout(qT); ro.disconnect(); io.disconnect(); });
 
-  /* ---------- старт ---------- */
   try { history.replaceState(Object.assign({}, history.state, { btDepth: depth() }), "", location.href); } catch {}
   buildIndex();
   applyHash();
