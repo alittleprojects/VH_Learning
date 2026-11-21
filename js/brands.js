@@ -572,6 +572,10 @@
   /* ================= ИСТОРИЯ ================= */
   const SORTS = ["az", "za", "cheap", "rich", "hot", "fresh", "links", "ohm"];
 
+  const depth = () => {
+    const s = history.state;
+    return s && typeof s.btDepth === "number" ? s.btDepth : 0;
+  };
   function hashString() {
     const p = new URLSearchParams();
     if (S.brand) p.set("b", S.brand);
@@ -586,11 +590,16 @@
     const raw = location.hash.replace(/^#/, "");
     return /^(device|coil)=/.test(raw) ? null : raw;
   }
-  function syncHash(push) {
+  function writeHash(push, forcedDepth) {
     const s = hashString();
-    if ((currentHash() || "") === s) return;
     const url = s ? "#" + s : location.pathname + location.search;
-    try { push ? history.pushState({ bt: 1 }, "", url) : history.replaceState(history.state, "", url); } catch {}
+    const d = typeof forcedDepth === "number" ? forcedDepth : (push ? depth() + 1 : depth());
+    const state = Object.assign({}, history.state, { btDepth: d });
+    try { push ? history.pushState(state, "", url) : history.replaceState(state, "", url); } catch {}
+  }
+  function syncHash(push) {
+    if ((currentHash() || "") === hashString()) return;
+    writeHash(push);
   }
   function applyHash() {
     const raw = currentHash();
@@ -607,25 +616,39 @@
     limit = PAGE;
   }
 
-  /* ================= ДЕЙСТВИЯ ================= */
+  /* ================= НАВИГАЦИЯ ================= */
   function scrollToTop() {
     const tabs = parseFloat(getComputedStyle(root).getPropertyValue("--tabs")) || 0;
     const bar = parseFloat(getComputedStyle(root).getPropertyValue("--bar")) || 0;
     scrollTo({ top: Math.max(0, root.getBoundingClientRect().top + scrollY - tabs - bar - 12), behavior: "smooth" });
   }
   function goBrand(name) {
+    if (S.brand === name) { scrollToTop(); return; }
     S.brand = name;
     limit = PAGE;
     render();
     syncHash(true);
     scrollToTop();
   }
-  function goHome() {
-    S.brand = null; S.q = ""; S.hit = false;
-    limit = PAGE;
-    render();
-    syncHash(true);
+  function backToBrands() {
     scrollTo({ top: 0, behavior: "smooth" });
+    if (depth() > 0) {
+      let popped = false;
+      window.addEventListener("popstate", () => { popped = true; }, { once: true });
+      try { history.back(); } catch {}
+      setTimeout(() => {
+        if (popped) return;
+        S.brand = null; S.q = ""; S.hit = false; limit = PAGE;
+        render();
+        writeHash(false, 0);
+        measure();
+      }, 320);
+      return;
+    }
+    S.brand = null; S.q = ""; S.hit = false; limit = PAGE;
+    render();
+    writeHash(false, 0);
+    measure();
   }
   function update(resetLimit = true) {
     if (resetLimit) limit = PAGE;
@@ -656,13 +679,13 @@
   });
   $("btSort").addEventListener("change", (e) => { S.sort = e.target.value; savePref(); update(); });
   $("btHit").addEventListener("click", () => { S.hit = !S.hit; update(); });
-  $("btReset").addEventListener("click", () => { goHome(); toast("ПОКАЗАНЫ ВСЕ ПРОИЗВОДИТЕЛИ"); });
+  $("btReset").addEventListener("click", () => { backToBrands(); toast("ПОКАЗАНЫ ВСЕ ПРОИЗВОДИТЕЛИ"); });
   $("btMoreB").addEventListener("click", () => { limit += PAGE; render(); });
 
   root.addEventListener("click", (e) => {
     const b = e.target.closest("[data-brand]");
     if (b) { goBrand(b.dataset.brand); return; }
-    if (e.target.closest("[data-home]")) { goHome(); return; }
+    if (e.target.closest("[data-home]")) { backToBrands(); return; }
   });
 
   document.addEventListener("keydown", (e) => {
@@ -672,7 +695,7 @@
     }
     if (e.key === "Escape") {
       if (S.q) { S.q = ""; update(); return; }
-      if (S.brand) goHome();
+      if (S.brand) backToBrands();
     }
   });
 
@@ -691,7 +714,7 @@
       if (S.brand && S.brand !== "*" && !pool().some((x) => x.brand === S.brand)) {
         S.brand = null;
         render();
-        syncHash(false);
+        writeHash(false, 0);
         return;
       }
       render();
@@ -736,6 +759,7 @@
   });
 
   /* ================= СТАРТ ================= */
+  try { history.replaceState(Object.assign({}, history.state, { btDepth: depth() }), "", location.href); } catch {}
   applyHash();
   render();
   attach();
