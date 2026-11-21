@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-18T20:54:40.337Z",
+    "updatedAt": "2026-11-21T18:16:56.475Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -82,8 +82,8 @@ window.CATALOG_DATA = {
       "resistance": "0.3Ω",
       "type": "испаритель",
       "price": 390,
-      "image": "",
-      "description": "Для субомных баков Vaporesso."
+      "description": "Для субомных баков Vaporesso.",
+      "image": "images/coils/gtx_0.3.jpg"
     },
     {
       "id": "gtx-06",
@@ -92,8 +92,8 @@ window.CATALOG_DATA = {
       "resistance": "0.6Ω",
       "type": "испаритель",
       "price": 390,
-      "image": "",
-      "description": "Универсальный GTX."
+      "description": "Универсальный GTX.",
+      "image": "images/coils/gtx_0.6.png"
     },
     {
       "id": "pnp-x-015",
@@ -131,9 +131,9 @@ window.CATALOG_DATA = {
       "name": "V.Thru / Vmate Cartridge",
       "resistance": "0.7Ω",
       "type": "картридж",
-      "price": 420,
-      "image": "",
-      "description": "Для V.Thru Pro, Vmate E, Vmate Pro."
+      "price": 360,
+      "description": "Для V.Thru Pro, Vmate E, Vmate Pro.",
+      "image": "images/coils/voopoo/vmate_0.7.jpg"
     },
     {
       "id": "vthru-12",
@@ -141,9 +141,9 @@ window.CATALOG_DATA = {
       "name": "V.Thru / Vmate Cartridge",
       "resistance": "1.2Ω",
       "type": "картридж",
-      "price": 420,
-      "image": "",
-      "description": "Тугая затяжка."
+      "price": 360,
+      "description": "Тугая затяжка.",
+      "image": "images/coils/voopoo/vmate_1.2.jpeg"
     },
     {
       "id": "geek-q-06",
@@ -343,7 +343,57 @@ window.CATALOG_DATA = {
       "type": "картридж",
       "price": 360,
       "description": "",
-      "image": ""
+      "image": "images/coils/voopoo/vmate_0.4.png"
+    },
+    {
+      "id": "coil-1795209627050-9c4b3",
+      "brand": "Vaporesso",
+      "name": "GTX Mesh",
+      "resistance": "0.15Ω",
+      "type": "испаритель",
+      "price": 0,
+      "description": "",
+      "image": "images/coils/gtx_0.15.jpg"
+    },
+    {
+      "id": "coil-1795209648984-cb7c7",
+      "brand": "Vaporesso",
+      "name": "GTX Mesh",
+      "resistance": "0.2Ω",
+      "type": "испаритель",
+      "price": 0,
+      "description": "",
+      "image": "images/coils/gtx_0.2.jpg"
+    },
+    {
+      "id": "coil-1795209676901-9ca21",
+      "brand": "Vaporesso",
+      "name": "GTX Mesh",
+      "resistance": "0.4Ω",
+      "type": "испаритель",
+      "price": 0,
+      "description": "",
+      "image": "images/coils/gtx_0.4.webp"
+    },
+    {
+      "id": "coil-1795209699560-c1f9f",
+      "brand": "Vaporesso",
+      "name": "GTX Mesh",
+      "resistance": "0.8Ω",
+      "type": "испаритель",
+      "price": 0,
+      "description": "",
+      "image": "images/coils/gtx_0.8.png"
+    },
+    {
+      "id": "coil-1795209729403-2a506",
+      "brand": "Vaporesso",
+      "name": "GTX Mesh",
+      "resistance": "1.2Ω",
+      "type": "испаритель",
+      "price": 0,
+      "description": "",
+      "image": "images/coils/gtx_1.2.png"
     }
   ],
   "devices": [
@@ -352,9 +402,9 @@ window.CATALOG_DATA = {
       "brand": "Vaporesso",
       "model": "XROS 4",
       "type": "POD",
-      "price": 1690,
+      "price": 0,
       "description": "Топ-продаж. Регулировка обдува, Type-C, 1000 мАч. Подходят картриджи XROS Series.",
-      "popular": true,
+      "popular": false,
       "image": "images/devices/xros4.jpg",
       "coils": [
         "xros-04",
@@ -372,27 +422,10 @@ window.CATALOG_DATA = {
       "type": "POD",
       "price": 2690,
       "description": "Будет потом",
-      "popular": true,
+      "popular": false,
       "image": "images/devices/xros_pro_2.jpg",
       "coils": [
         "xros-04",
-        "xros-06",
-        "xros-08",
-        "xros-10",
-        "xros-12",
-        "coil-1794770397313-046f7"
-      ]
-    },
-    {
-      "id": "dev-xros-mini",
-      "brand": "Vaporesso",
-      "model": "XROS Mini",
-      "type": "POD",
-      "price": 1190,
-      "description": "Компактная версия. Для новичков.",
-      "popular": true,
-      "image": "images/devices/_AMzQiHvqO8.jpg",
-      "coils": [
         "xros-06",
         "xros-08",
         "xros-10",
@@ -405,10 +438,10 @@ window.CATALOG_DATA = {
       "brand": "Vaporesso",
       "model": "Luxe Q2 SE",
       "type": "POD",
-      "popular": true,
       "price": 1390,
+      "description": "",
+      "popular": false,
       "image": "",
-      "description": "Стильный корпус, прозрачные вставки. ВАЖНО: картриджи Luxe Q НЕ подходят к XROS!",
       "coils": [
         "luxe-q-08",
         "luxe-q-12"
@@ -419,10 +452,10 @@ window.CATALOG_DATA = {
       "brand": "Vaporesso",
       "model": "Luxe XR Max",
       "type": "Pod-Mod",
-      "popular": true,
       "price": 2790,
-      "image": "",
       "description": "Pod-Mod с регулировкой мощности. Для свободной затяжки.",
+      "popular": false,
+      "image": "",
       "coils": [
         "gtx-03",
         "gtx-06"
@@ -435,7 +468,7 @@ window.CATALOG_DATA = {
       "type": "Pod-Mod",
       "price": 2490,
       "description": "Новая платформа PnP-X. ВНИМАНИЕ: старые PnP-испарители НЕ подходят!",
-      "popular": true,
+      "popular": false,
       "image": "images/devices/_AMzQiHvqO8.jpg",
       "coils": [
         "pnp-x-015",
@@ -447,10 +480,10 @@ window.CATALOG_DATA = {
       "brand": "VOOPOO",
       "model": "V.Thru Pro",
       "type": "POD",
-      "popular": true,
       "price": 1590,
-      "image": "",
       "description": "Компактный POD с верхней заправкой.",
+      "popular": false,
+      "image": "",
       "coils": [
         "vthru-07",
         "vthru-12"
@@ -476,10 +509,10 @@ window.CATALOG_DATA = {
       "brand": "GeekVape",
       "model": "Wenax Q",
       "type": "POD",
-      "popular": true,
       "price": 1390,
-      "image": "",
       "description": "Один из самых популярных POD. Q-картриджи НЕ подходят к Wenax M!",
+      "popular": false,
+      "image": "",
       "coils": [
         "geek-q-06",
         "geek-q-08",
@@ -493,8 +526,8 @@ window.CATALOG_DATA = {
       "type": "Pod-Mod",
       "price": 0,
       "description": "Защищённый Pod-Mod. B-Series испарители.",
-      "popular": true,
-      "image": "",
+      "popular": false,
+      "image": "images/devices/GeekVape/B60.webp",
       "coils": [
         "geek-b-04",
         "geek-b-06",
@@ -511,7 +544,7 @@ window.CATALOG_DATA = {
       "price": 2390,
       "description": "Компактный Pod-Mod с B-Series.",
       "popular": false,
-      "image": "",
+      "image": "images/devices/GeekVape/H45_classic.jpg",
       "coils": [
         "geek-b-04",
         "geek-b-06",
@@ -524,10 +557,10 @@ window.CATALOG_DATA = {
       "brand": "Rincoe",
       "model": "Manto Nano",
       "type": "POD",
-      "popular": true,
       "price": 1190,
-      "image": "",
       "description": "Бюджетный POD.",
+      "popular": false,
+      "image": "",
       "coils": [
         "rincoe-manto-08"
       ]
@@ -537,10 +570,10 @@ window.CATALOG_DATA = {
       "brand": "Smoant",
       "model": "Pasito II",
       "type": "Pod-Mod",
-      "popular": true,
       "price": 2490,
-      "image": "",
       "description": "Pod-Mod с RBA-базой. Для продвинутых.",
+      "popular": false,
+      "image": "",
       "coils": [
         "smoant-pasito-06",
         "smoant-pasito-10"
@@ -561,27 +594,14 @@ window.CATALOG_DATA = {
       ]
     },
     {
-      "id": "dev-plonq-pod",
-      "brand": "Plonq",
-      "model": "Plonq Pod",
-      "type": "POD",
-      "popular": true,
-      "price": 990,
-      "image": "",
-      "description": "Самый бюджетный POD в линейке.",
-      "coils": [
-        "plonq-cart"
-      ]
-    },
-    {
       "id": "dev-minican",
       "brand": "Brusko",
       "model": "Minican",
       "type": "POD",
-      "popular": true,
       "price": 990,
-      "image": "",
       "description": "Хит продаж среди бюджетных POD. Minican-картриджи подходят ко всем Minican.",
+      "popular": false,
+      "image": "",
       "coils": [
         "brusko-minican-10",
         "brusko-minican-12"
@@ -592,10 +612,10 @@ window.CATALOG_DATA = {
       "brand": "Lost Vape",
       "model": "Ursa Nano",
       "type": "POD",
-      "popular": true,
       "price": 1390,
-      "image": "",
       "description": "Премиальный POD.",
+      "popular": false,
+      "image": "",
       "coils": [
         "lost-ursa-08",
         "lost-ursa-10"
@@ -645,8 +665,16 @@ window.CATALOG_DATA = {
       "price": 0,
       "description": "",
       "popular": false,
-      "image": "",
-      "coils": []
+      "image": "images/devices/Armour_g.png",
+      "coils": [
+        "coil-1795209627050-9c4b3",
+        "coil-1795209648984-cb7c7",
+        "coil-1795209676901-9ca21",
+        "coil-1795209699560-c1f9f",
+        "coil-1795209729403-2a506",
+        "gtx-03",
+        "gtx-06"
+      ]
     },
     {
       "id": "dev-1794943734184-2fa2d",
@@ -656,7 +684,7 @@ window.CATALOG_DATA = {
       "price": 2590,
       "description": "",
       "popular": false,
-      "image": "",
+      "image": "images/devices/GeekVape/hero5.jpg",
       "coils": [
         "coil-1794943395917-284f3",
         "coil-1794943456151-efcb1",
@@ -673,7 +701,7 @@ window.CATALOG_DATA = {
       "price": 0,
       "description": "",
       "popular": false,
-      "image": "",
+      "image": "images/devices/GeekVape/hero2.jpg",
       "coils": [
         "coil-1794943456151-efcb1",
         "geek-b-04",
@@ -725,7 +753,7 @@ window.CATALOG_DATA = {
       "price": 0,
       "description": "",
       "popular": false,
-      "image": "",
+      "image": "images/devices/xros3.png",
       "coils": [
         "xros-12",
         "xros-10",
@@ -742,7 +770,7 @@ window.CATALOG_DATA = {
       "price": 0,
       "description": "",
       "popular": false,
-      "image": "",
+      "image": "images/devices/xros3_mini.png",
       "coils": [
         "xros-06",
         "coil-1794770397313-046f7",
@@ -766,6 +794,93 @@ window.CATALOG_DATA = {
         "xros-08",
         "xros-10",
         "xros-12"
+      ]
+    },
+    {
+      "id": "dev-1795203079354-908d8",
+      "brand": "GeekVape",
+      "model": "Aegis Boost 3",
+      "type": "Pod-Mod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/GeekVape/Boost3.jpg",
+      "coils": [
+        "coil-1794943497691-ce1eb",
+        "geek-b-06",
+        "coil-1794943395917-284f3",
+        "coil-1794943456151-efcb1",
+        "geek-b-04"
+      ]
+    },
+    {
+      "id": "dev-1795203231196-4be91",
+      "brand": "GeekVape",
+      "model": "Aegis Boost LE",
+      "type": "Pod-Mod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/GeekVape/Boost_Le.jpg",
+      "coils": [
+        "coil-1794943456151-efcb1",
+        "geek-b-04",
+        "geek-b-06",
+        "coil-1794943497691-ce1eb"
+      ]
+    },
+    {
+      "id": "dev-1795203430564-87171",
+      "brand": "Vaporesso",
+      "model": "Armour GS",
+      "type": "Pod-Mod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/Armour_gs.png",
+      "coils": [
+        "coil-1795209627050-9c4b3",
+        "coil-1795209648984-cb7c7",
+        "coil-1795209676901-9ca21",
+        "coil-1795209699560-c1f9f",
+        "coil-1795209729403-2a506",
+        "gtx-03",
+        "gtx-06"
+      ]
+    },
+    {
+      "id": "dev-1795204879453-817e3",
+      "brand": "GeekVape",
+      "model": "Digi Pro R",
+      "type": "Pod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/GeekVape/Digi.png",
+      "coils": []
+    },
+    {
+      "id": "dev-1795206160743-e2f53",
+      "brand": "Plonq",
+      "model": "Meta Lite",
+      "type": "POD",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "",
+      "coils": []
+    },
+    {
+      "id": "dev-1795206191785-672d9",
+      "brand": "Plonq",
+      "model": "Meta Smart",
+      "type": "Pod",
+      "price": 3390,
+      "description": "",
+      "popular": false,
+      "image": "",
+      "coils": [
+        "plonq-cart"
       ]
     }
   ]
