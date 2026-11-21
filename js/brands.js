@@ -81,11 +81,16 @@
   const DEF = { brand: null, kind: "devices", q: "", sort: "az", view: "grid", hit: false };
   let S = { ...DEF };
   let limit = PAGE;
+  let prefs = { kind: "devices", sort: "az", view: "grid" };
   try {
     const p = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
-    ["kind", "sort", "view"].forEach((k) => { if (p[k] !== undefined) S[k] = p[k]; });
+    ["kind", "sort", "view"].forEach((k) => { if (p[k] !== undefined) prefs[k] = p[k]; });
   } catch {}
-  const savePref = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify({ kind: S.kind, sort: S.sort, view: S.view })); } catch {} };
+  Object.assign(S, prefs);
+  const savePref = () => {
+    prefs = { kind: S.kind, sort: S.sort, view: S.view };
+    try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch {}
+  };
 
   /* ================= КАРКАС ================= */
   [...host.children].forEach((n) => { n.hidden = true; n.dataset.btLegacy = "1"; });
@@ -149,7 +154,7 @@
       --invbg:#fff;--invfg:#000;--tabs:61px;--bar:66px;
       font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
       background:var(--bg);color:var(--fg);margin:-22px -22px 0;padding:22px 22px 0;
-      border-top:2px solid var(--fg)}
+      border-top:2px solid var(--fg);overflow-x:clip;overflow-y:visible}
     :root[data-theme="light"] .bt-root{
       --bg:#fff;--fg:#000;--dim:#5c5c5c;--dim2:#8c8c8c;--line:#d6d6d6;--line2:#a8a8a8;
       --tile:#f2f2f2;--hatch:rgba(0,0,0,.06);
@@ -160,7 +165,6 @@
     .bt-root :focus-visible{outline:3px solid var(--fg);outline-offset:2px}
     .bt-root mark{background:var(--fg);color:var(--bg);padding:0 3px}
 
-    /* ---- ПАНЕЛЬ ---- */
     .bt-bar{position:sticky;top:var(--tabs);z-index:40;display:flex;flex-wrap:wrap;gap:10px;align-items:center;
       padding:12px 0;margin-bottom:18px;background:var(--bg);border-bottom:2px solid var(--fg)}
     .bt-search{position:relative;flex:1;min-width:250px;display:flex;align-items:center}
@@ -193,12 +197,10 @@
     .bt-crumbs b{color:var(--fg)}
     .bt-crumbs i{font-style:normal;opacity:.55}
 
-    /* ---- ЗАГОЛОВОК ---- */
     .bt-head{margin-bottom:24px}
     .bt-head h2{margin:0;font-size:clamp(46px,9.2vw,112px);font-weight:900;line-height:.84;
       letter-spacing:-.05em;text-transform:uppercase}
 
-    /* ---- ПЛИТКИ БРЕНДОВ ---- */
     .bt-brands{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:12px;margin-bottom:34px}
     .bt-tile{position:relative;display:flex;flex-direction:column;justify-content:space-between;
       min-height:262px;padding:20px 18px;text-align:left;cursor:pointer;overflow:hidden;
@@ -229,12 +231,10 @@
     .bt-tile.inv:hover .bt-tname,.bt-tile.inv:hover .bt-tnum span{color:var(--fg);opacity:.72}
     .bt-alltxt{position:relative;font-size:clamp(26px,3.2vw,38px);font-weight:900;line-height:.9;letter-spacing:-.035em;text-transform:uppercase}
 
-    /* ---- СЕКЦИЯ ---- */
     .bt-sechead{display:flex;align-items:center;gap:14px;margin:0 0 16px;padding-bottom:10px;border-bottom:2px solid var(--fg)}
     .bt-sechead h3{margin:0;font-size:15px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
     .bt-sechead span{margin-left:auto;font-size:10px;font-weight:900;letter-spacing:.14em;color:var(--dim)}
 
-    /* ---- ШАПКА БРЕНДА ---- */
     .bt-bhero{display:flex;flex-wrap:wrap;gap:20px;align-items:center;padding:20px;margin-bottom:22px;
       border:2px solid var(--fg);background:var(--tile);position:relative;overflow:hidden}
     .bt-bhero::before{content:"";position:absolute;inset:0;pointer-events:none;
@@ -250,7 +250,6 @@
     .bt-stats{display:flex;flex-wrap:wrap;gap:18px;margin-bottom:18px;font-size:10px;font-weight:900;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
     .bt-stats b{color:var(--fg);font-variant-numeric:tabular-nums}
 
-    /* ---- КАРТОЧКИ ---- */
     .bt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:14px}
     .bt-card{position:relative;display:flex;flex-direction:column;background:var(--card);color:var(--cardfg);
       border:2px solid var(--cardline);text-decoration:none;overflow:hidden;
@@ -279,7 +278,6 @@
       font-size:11px;font-weight:900;letter-spacing:.16em;cursor:pointer;transition:.14s;white-space:nowrap}
     .bt-card:hover .bt-start{background:#fff;color:#000}
 
-    /* ---- СПИСОК ---- */
     .bt-list{display:flex;flex-direction:column;gap:0;border:2px solid var(--fg)}
     .bt-row{display:flex;gap:14px;align-items:center;padding:11px 14px;background:var(--card);color:var(--cardfg);
       border-bottom:2px solid var(--cardline);text-decoration:none;transition:.14s}
@@ -301,7 +299,6 @@
     .bt-rprice{font-size:15px;font-weight:900;white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums}
     .bt-rgo{font-size:15px;font-weight:900;flex-shrink:0}
 
-    /* ---- ПРОЧЕЕ ---- */
     .bt-more{display:flex;justify-content:center;padding:22px 0}
     .bt-btn{padding:15px 28px;border:2px solid var(--fg);background:var(--fg);color:var(--bg);
       font-size:12px;font-weight:900;letter-spacing:.16em;cursor:pointer;transition:.14s}
@@ -452,7 +449,7 @@
   function render() {
     const k = S.kind;
     const unit = k === "devices" ? "УСТРОЙСТВ" : "КАРТРИДЖЕЙ";
-    $("btQ").value = S.q;
+    if ($("btQ").value !== S.q) $("btQ").value = S.q;
     $("btQC").hidden = !S.q;
     [...$("btKind").children].forEach((b) => b.classList.toggle("on", b.dataset.k === k));
     [...$("btView").children].forEach((b) => b.classList.toggle("on", b.dataset.v === S.view));
@@ -461,6 +458,7 @@
 
     const sorts = [["az", "А → Я"], ["za", "Я → А"], ["cheap", "ЦЕНА ↑"], ["rich", "ЦЕНА ↓"], ["hot", "СНАЧАЛА ХИТ"], ["fresh", "СНАЧАЛА НОВЫЕ"], ["links", "БОЛЬШЕ СВЯЗЕЙ"]];
     if (k === "coils") sorts.splice(4, 0, ["ohm", "СОПРОТИВЛЕНИЕ ↑"]);
+    if (!sorts.some(([v]) => v === S.sort)) S.sort = "az";
     $("btSort").innerHTML = sorts.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
     $("btSort").value = S.sort;
 
@@ -517,7 +515,6 @@
           <div class="bt-sechead"><h3>${k === "devices" ? "ХИТЫ ПРОДАЖ" : "ПОПУЛЯРНЫЕ КАРТРИДЖИ"}</h3><span>${feat.length} ПОЗИЦИИ</span></div>
           <div class="bt-grid">${feat.map((x) => cardHTML(x, k)).join("")}</div>` : ""}
       `;
-      paintHash();
       return;
     }
 
@@ -561,7 +558,6 @@
     if (!list.length) {
       body.innerHTML = head + stats + `<div class="bt-empty"><b>НИЧЕГО НЕ НАЙДЕНО</b><p>Измени запрос${S.hit ? " или сними отбор ХИТ" : ""} — либо вернись к выбору производителя</p><button class="bt-btn" type="button" data-home="1">К ПРОИЗВОДИТЕЛЯМ</button></div>`;
       $("btMore").hidden = true;
-      paintHash();
       return;
     }
 
@@ -571,10 +567,11 @@
 
     $("btMore").hidden = shown >= list.length;
     $("btMoreB").textContent = `ПОКАЗАТЬ ЕЩЁ ${Math.min(PAGE, list.length - shown)} · ОСТАЛОСЬ ${list.length - shown}`;
-    paintHash();
   }
 
-  /* ================= ХЭШ ================= */
+  /* ================= ИСТОРИЯ ================= */
+  const SORTS = ["az", "za", "cheap", "rich", "hot", "fresh", "links", "ohm"];
+
   function hashString() {
     const p = new URLSearchParams();
     if (S.brand) p.set("b", S.brand);
@@ -585,22 +582,29 @@
     if (S.hit) p.set("h", "1");
     return p.toString();
   }
-  function paintHash(push) {
-    const s = hashString();
-    const url = s ? "#" + s : location.pathname + location.search;
-    try { push ? history.pushState(null, "", url) : history.replaceState(null, "", url); } catch {}
-  }
-  function readHash() {
+  function currentHash() {
     const raw = location.hash.replace(/^#/, "");
-    if (!raw || /^(device|coil)=/.test(raw)) return false;
-    const p = new URLSearchParams(raw);
+    return /^(device|coil)=/.test(raw) ? null : raw;
+  }
+  function syncHash(push) {
+    const s = hashString();
+    if ((currentHash() || "") === s) return;
+    const url = s ? "#" + s : location.pathname + location.search;
+    try { push ? history.pushState({ bt: 1 }, "", url) : history.replaceState(history.state, "", url); } catch {}
+  }
+  function applyHash() {
+    const raw = currentHash();
+    const p = new URLSearchParams(raw || "");
     S.brand = p.get("b") || null;
     S.kind = p.get("k") === "coils" ? "coils" : "devices";
     S.q = p.get("q") || "";
-    S.sort = p.get("o") || "az";
+    const o = p.get("o");
+    S.sort = SORTS.includes(o) ? o : "az";
+    if (S.sort === "ohm" && S.kind !== "coils") S.sort = "az";
     S.view = p.get("v") === "list" ? "list" : "grid";
-    S.hit = p.get("h") === "1";
-    return true;
+    S.hit = p.get("h") === "1" && S.kind === "devices";
+    if (!raw) { S.kind = prefs.kind; S.sort = prefs.sort; S.view = prefs.view; }
+    limit = PAGE;
   }
 
   /* ================= ДЕЙСТВИЯ ================= */
@@ -609,33 +613,49 @@
     const bar = parseFloat(getComputedStyle(root).getPropertyValue("--bar")) || 0;
     scrollTo({ top: Math.max(0, root.getBoundingClientRect().top + scrollY - tabs - bar - 12), behavior: "smooth" });
   }
-  function goBrand(name) { S.brand = name; limit = PAGE; render(); paintHash(true); scrollToTop(); }
-  function goHome() { S.brand = null; S.q = ""; S.hit = false; limit = PAGE; render(); paintHash(true); scrollTo({ top: 0, behavior: "smooth" }); }
-  function refresh(resetLimit = true) { if (resetLimit) limit = PAGE; render(); }
+  function goBrand(name) {
+    S.brand = name;
+    limit = PAGE;
+    render();
+    syncHash(true);
+    scrollToTop();
+  }
+  function goHome() {
+    S.brand = null; S.q = ""; S.hit = false;
+    limit = PAGE;
+    render();
+    syncHash(true);
+    scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function update(resetLimit = true) {
+    if (resetLimit) limit = PAGE;
+    render();
+    syncHash(false);
+  }
 
   /* ================= СОБЫТИЯ ================= */
   let qT = 0;
   $("btQ").addEventListener("input", (e) => {
     clearTimeout(qT);
     const v = e.target.value;
-    qT = setTimeout(() => { S.q = v; refresh(); }, 140);
+    qT = setTimeout(() => { S.q = v; update(); }, 140);
   });
-  $("btQC").addEventListener("click", () => { S.q = ""; refresh(); $("btQ").focus(); });
+  $("btQC").addEventListener("click", () => { S.q = ""; update(); $("btQ").focus(); });
   $("btKind").addEventListener("click", (e) => {
     const b = e.target.closest("[data-k]");
     if (!b || S.kind === b.dataset.k) return;
     S.kind = b.dataset.k;
     if (S.sort === "ohm" && S.kind !== "coils") S.sort = "az";
     S.hit = false;
-    savePref(); refresh();
+    savePref(); update();
   });
   $("btView").addEventListener("click", (e) => {
     const b = e.target.closest("[data-v]");
     if (!b) return;
-    S.view = b.dataset.v; savePref(); refresh(false);
+    S.view = b.dataset.v; savePref(); update(false);
   });
-  $("btSort").addEventListener("change", (e) => { S.sort = e.target.value; savePref(); refresh(); });
-  $("btHit").addEventListener("click", () => { S.hit = !S.hit; refresh(); });
+  $("btSort").addEventListener("change", (e) => { S.sort = e.target.value; savePref(); update(); });
+  $("btHit").addEventListener("click", () => { S.hit = !S.hit; update(); });
   $("btReset").addEventListener("click", () => { goHome(); toast("ПОКАЗАНЫ ВСЕ ПРОИЗВОДИТЕЛИ"); });
   $("btMoreB").addEventListener("click", () => { limit += PAGE; render(); });
 
@@ -651,11 +671,16 @@
       e.preventDefault(); $("btQ").focus(); $("btQ").select(); return;
     }
     if (e.key === "Escape") {
-      if (S.q) { S.q = ""; refresh(); return; }
+      if (S.q) { S.q = ""; update(); return; }
       if (S.brand) goHome();
     }
   });
-  window.addEventListener("popstate", () => { readHash(); limit = PAGE; render(); });
+
+  window.addEventListener("popstate", () => {
+    applyHash();
+    render();
+    measure();
+  });
 
   /* ================= ЖИВАЯ БАЗА ================= */
   let dbT = 0;
@@ -663,7 +688,12 @@
     clearTimeout(dbT);
     dbT = setTimeout(() => {
       db = readDb();
-      if (S.brand && S.brand !== "*" && !pool().some((x) => x.brand === S.brand)) S.brand = null;
+      if (S.brand && S.brand !== "*" && !pool().some((x) => x.brand === S.brand)) {
+        S.brand = null;
+        render();
+        syncHash(false);
+        return;
+      }
       render();
     }, 200);
   }
@@ -672,7 +702,7 @@
   localStorage.setItem = function (k, v) { origSet(k, v); if (k === DB_KEY) reload(); };
   localStorage.removeItem = function (k) { origDel(k); if (k === DB_KEY) reload(); };
   window.addEventListener("storage", (e) => { if (e.key === DB_KEY) reload(); });
-  document.querySelectorAll('.tab[data-tab="catalog"]').forEach((b) => b.addEventListener("click", () => setTimeout(() => { db = readDb(); render(); }, 0)));
+  document.querySelectorAll('.tab[data-tab="catalog"]').forEach((b) => b.addEventListener("click", () => setTimeout(() => { db = readDb(); render(); measure(); }, 0)));
 
   /* ================= ЛИПКИЕ ОТСТУПЫ ================= */
   function measure() {
@@ -681,20 +711,32 @@
     root.style.setProperty("--bar", Math.round($("btBar").getBoundingClientRect().height) + "px");
   }
   const ro = new ResizeObserver(measure);
-  const tabsEl = document.querySelector(".tabs");
-  if (tabsEl) ro.observe(tabsEl);
-  ro.observe($("btBar"));
-  window.addEventListener("resize", measure);
-
   const io = new IntersectionObserver((en) => {
     if (en.some((x) => x.isIntersecting) && !showcase() && limit < results().length) { limit += PAGE; render(); }
   }, { rootMargin: "320px" });
-  io.observe($("btSentinel"));
 
-  window.addEventListener("pagehide", () => { clearTimeout(dbT); clearTimeout(qT); ro.disconnect(); io.disconnect(); });
+  function attach() {
+    const tabs = document.querySelector(".tabs");
+    ro.disconnect();
+    if (tabs) ro.observe(tabs);
+    ro.observe($("btBar"));
+    io.disconnect();
+    io.observe($("btSentinel"));
+    measure();
+  }
+  window.addEventListener("resize", measure);
+
+  window.addEventListener("pageshow", (e) => {
+    attach();
+    if (e.persisted) { db = readDb(); applyHash(); render(); measure(); }
+  });
+  window.addEventListener("pagehide", () => {
+    clearTimeout(dbT); clearTimeout(qT);
+    ro.disconnect(); io.disconnect();
+  });
 
   /* ================= СТАРТ ================= */
-  readHash();
-  measure();
+  applyHash();
   render();
+  attach();
 })();
