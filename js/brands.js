@@ -194,16 +194,9 @@
     .bt-crumbs i{font-style:normal;opacity:.55}
 
     /* ---- ЗАГОЛОВОК ---- */
-    .bt-head{margin-bottom:26px}
+    .bt-head{margin-bottom:24px}
     .bt-head h2{margin:0;font-size:clamp(46px,9.2vw,112px);font-weight:900;line-height:.84;
       letter-spacing:-.05em;text-transform:uppercase}
-    .bt-head p{margin:16px 0 0;max-width:56ch;font-size:12px;font-weight:800;line-height:1.75;
-      letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
-    .bt-facts{display:flex;flex-wrap:wrap;gap:0;margin-top:20px;border:2px solid var(--fg)}
-    .bt-fact{flex:1;min-width:118px;padding:12px 14px;border-right:2px solid var(--fg)}
-    .bt-fact:last-child{border-right:0}
-    .bt-fact b{display:block;font-size:26px;font-weight:900;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-    .bt-fact span{display:block;margin-top:6px;font-size:9px;font-weight:900;letter-spacing:.16em;color:var(--dim)}
 
     /* ---- ПЛИТКИ БРЕНДОВ ---- */
     .bt-brands{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:12px;margin-bottom:34px}
@@ -341,8 +334,6 @@
       .bt-status{margin:26px -14px 0;padding:12px 14px;gap:9px}
       .bt-status span:nth-child(2){margin-left:0}
       .bt-rlinks{display:none}
-      .bt-fact{min-width:50%;border-bottom:2px solid var(--fg)}
-      .bt-fact:nth-child(even){border-right:0}
     }
     @media (prefers-reduced-motion:reduce){
       .bt-tile,.bt-card,.bt-row{animation:none!important;transition:none!important}
@@ -358,7 +349,7 @@
     if (!n) {
       n = document.createElement("div");
       n.id = "btToast";
-      n.style.cssText = "position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:9999;padding:14px 20px;border:2px solid var(--bt-f,#fff);background:#000;color:#fff;font:900 11.5px/1.4 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;transition:.22s;max-width:min(92vw,460px)";
+      n.style.cssText = "position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:9999;padding:14px 20px;border:2px solid #fff;background:#000;color:#fff;font:900 11.5px/1.4 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;transition:.22s;max-width:min(92vw,460px)";
       document.body.appendChild(n);
     }
     const light = document.documentElement.getAttribute("data-theme") === "light";
@@ -488,8 +479,6 @@
     if (showcase()) {
       const brands = brandList();
       const total = pool().length;
-      const withPhoto = pool().filter((x) => x.image).length;
-      const hits = k === "devices" ? db.devices.filter((x) => x.popular).length : 0;
       const featured = (k === "devices" ? db.devices.filter((x) => x.popular) : db.coils).slice(0, 3);
       const feat = featured.length ? featured : pool().slice(0, 3);
 
@@ -497,16 +486,7 @@
       $("btMore").hidden = true;
 
       body.innerHTML = `
-        <div class="bt-head">
-          <h2>ВЫБЕРИ<br>БРЕНД</h2>
-          <p>Выбери производителя — откроется только его линейка ${unit}. Без бесконечной ленты всего ассортимента.</p>
-          <div class="bt-facts">
-            <div class="bt-fact"><b>${pad(total)}</b><span>${unit}</span></div>
-            <div class="bt-fact"><b>${pad(brands.length)}</b><span>БРЕНДОВ</span></div>
-            <div class="bt-fact"><b>${pad(withPhoto)}</b><span>С ФОТО</span></div>
-            ${k === "devices" ? `<div class="bt-fact"><b>${pad(hits)}</b><span>ХИТОВ</span></div>` : ""}
-          </div>
-        </div>
+        <div class="bt-head"><h2>ВЫБЕРИ<br>БРЕНД</h2></div>
 
         <div class="bt-brands">
           ${brands.map((b, i) => `
