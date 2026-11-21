@@ -8,9 +8,9 @@
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
-  /* ================= РЕДКИЙ ТАЙМЕР · 11–20 МИНУТ ================= */
-  const GAP_MIN = 11 * 60 * 1000;
-  const GAP_MAX = 20 * 60 * 1000;
+  /* ================= РЕДКИЙ ТАЙМЕР · 5–10 МИНУТ ================= */
+  const GAP_MIN = 5 * 60 * 1000;
+  const GAP_MAX = 10 * 60 * 1000;
   const STORE_KEY = "vh_peek_next_v1";
 
   const store = (() => {
@@ -42,6 +42,7 @@
   };
 
   let nextAt = store.get() || newDeadline();
+  if (nextAt - Date.now() > GAP_MAX) nextAt = newDeadline();
 
   /* ================= ПЕРСОНАЖ ================= */
   const SVG = `
@@ -240,7 +241,7 @@
       out.push({ kind: "right", x: vw - w, y, w, h, axis: "x", from: 100, to: 30, angle: -7 });
     }
 
-    const anchors = document.querySelectorAll(".card, .panel, .mini-card, .question, .stage");
+    const anchors = document.querySelectorAll(".card, .panel, .mini-card, .question, .stage, .bt-card, .bt-tile");
     const good = [];
     anchors.forEach((el) => {
       const r = el.getBoundingClientRect();
