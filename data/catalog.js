@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:45:07.421Z",
+    "updatedAt": "2026-11-24T18:47:04.561Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -584,10 +584,10 @@ window.CATALOG_DATA = {
       "brand": "Smoant",
       "model": "Pasito Mini",
       "type": "POD",
-      "popular": false,
-      "price": 1690,
-      "image": "",
+      "price": 0,
       "description": "Компактная версия Pasito.",
+      "popular": false,
+      "image": "images/devices/Smoant/pasito_mini.webp",
       "coils": [
         "smoant-pasito-06",
         "smoant-pasito-10"
@@ -1033,6 +1033,17 @@ window.CATALOG_DATA = {
       "description": "",
       "popular": false,
       "image": "images/devices/Smoant/pasito_3-converted.webp",
+      "coils": []
+    },
+    {
+      "id": "dev-1795546006958-c222c",
+      "brand": "Smoant",
+      "model": "Charon Racer",
+      "type": "Pod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/Smoant/charon_racer-converted.webp",
       "coils": []
     }
   ]
