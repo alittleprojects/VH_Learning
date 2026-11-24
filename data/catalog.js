@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:38:19.145Z",
+    "updatedAt": "2026-11-24T18:38:43.299Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -1001,6 +1001,17 @@ window.CATALOG_DATA = {
         "vthru-07",
         "vthru-12"
       ]
+    },
+    {
+      "id": "dev-1795545518988-9fcbf",
+      "brand": "Lost Vape",
+      "model": "Thelema Nano",
+      "type": "Pod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/LostVape/thelema_nano-converted.webp",
+      "coils": []
     }
   ]
 };
