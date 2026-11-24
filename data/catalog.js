@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-21T18:16:56.475Z",
+    "updatedAt": "2026-11-24T17:23:22.042Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -422,7 +422,7 @@ window.CATALOG_DATA = {
       "type": "POD",
       "price": 2690,
       "description": "Будет потом",
-      "popular": false,
+      "popular": true,
       "image": "images/devices/xros_pro_2.jpg",
       "coils": [
         "xros-04",
@@ -438,7 +438,7 @@ window.CATALOG_DATA = {
       "brand": "Vaporesso",
       "model": "Luxe Q2 SE",
       "type": "POD",
-      "price": 1390,
+      "price": 0,
       "description": "",
       "popular": false,
       "image": "",
@@ -469,7 +469,7 @@ window.CATALOG_DATA = {
       "price": 2490,
       "description": "Новая платформа PnP-X. ВНИМАНИЕ: старые PnP-испарители НЕ подходят!",
       "popular": false,
-      "image": "images/devices/_AMzQiHvqO8.jpg",
+      "image": "",
       "coils": [
         "pnp-x-015",
         "pnp-x-03"
@@ -543,7 +543,7 @@ window.CATALOG_DATA = {
       "type": "Pod-Mod",
       "price": 2390,
       "description": "Компактный Pod-Mod с B-Series.",
-      "popular": false,
+      "popular": true,
       "image": "images/devices/GeekVape/H45_classic.jpg",
       "coils": [
         "geek-b-04",
@@ -628,7 +628,7 @@ window.CATALOG_DATA = {
       "type": "POD",
       "price": 2890,
       "description": "",
-      "popular": false,
+      "popular": true,
       "image": "images/devices/xros 6.png",
       "coils": [
         "xros-10",
@@ -683,7 +683,7 @@ window.CATALOG_DATA = {
       "type": "Pod-Mod",
       "price": 2590,
       "description": "",
-      "popular": false,
+      "popular": true,
       "image": "images/devices/GeekVape/hero5.jpg",
       "coils": [
         "coil-1794943395917-284f3",
@@ -803,7 +803,7 @@ window.CATALOG_DATA = {
       "type": "Pod-Mod",
       "price": 0,
       "description": "",
-      "popular": false,
+      "popular": true,
       "image": "images/devices/GeekVape/Boost3.jpg",
       "coils": [
         "coil-1794943497691-ce1eb",
@@ -877,8 +877,8 @@ window.CATALOG_DATA = {
       "type": "Pod",
       "price": 3390,
       "description": "",
-      "popular": false,
-      "image": "",
+      "popular": true,
+      "image": "images/devices/Plonq/Plonq_meta_smart.png",
       "coils": [
         "plonq-cart"
       ]
