@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:30:27.979Z",
+    "updatedAt": "2026-11-24T18:31:05.341Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -943,6 +943,20 @@ window.CATALOG_DATA = {
       "description": "",
       "popular": false,
       "image": "images/devices/VooPoo/drag_s3-converted.webp",
+      "coils": [
+        "pnp-x-015",
+        "pnp-x-03"
+      ]
+    },
+    {
+      "id": "dev-1795545062682-48136",
+      "brand": "VOOPOO",
+      "model": "Drag X3",
+      "type": "Pod-Mod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/VooPoo/drag_x3-converted.webp",
       "coils": [
         "pnp-x-015",
         "pnp-x-03"
