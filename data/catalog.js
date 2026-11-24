@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:37:12.021Z",
+    "updatedAt": "2026-11-24T18:37:17.465Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
