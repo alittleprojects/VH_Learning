@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T17:34:41.941Z",
+    "updatedAt": "2026-11-24T18:18:45.915Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -509,10 +509,10 @@ window.CATALOG_DATA = {
       "brand": "GeekVape",
       "model": "Wenax Q",
       "type": "POD",
-      "price": 1390,
-      "description": "Один из самых популярных POD. Q-картриджи НЕ подходят к Wenax M!",
+      "price": 0,
+      "description": "",
       "popular": false,
-      "image": "",
+      "image": "images/devices/GeekVape/wenax q-converted.webp",
       "coils": [
         "geek-q-06",
         "geek-q-08",
