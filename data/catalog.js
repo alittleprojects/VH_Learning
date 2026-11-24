@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:42:39.740Z",
+    "updatedAt": "2026-11-24T18:42:56.547Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -1011,6 +1011,17 @@ window.CATALOG_DATA = {
       "description": "",
       "popular": false,
       "image": "images/devices/LostVape/thelema_nano-converted.webp",
+      "coils": []
+    },
+    {
+      "id": "dev-1795545773399-9f2a5",
+      "brand": "Smoant",
+      "model": "Knight Aio",
+      "type": "Pod-Mod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/Smoant/knight_aio-converted.webp",
       "coils": []
     }
   ]
