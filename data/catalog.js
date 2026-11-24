@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:26:45.461Z",
+    "updatedAt": "2026-11-24T18:26:51.758Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -495,9 +495,9 @@ window.CATALOG_DATA = {
       "model": "Vmate i3",
       "type": "POD",
       "price": 1690,
-      "description": "Бюджетная версия Vmate. Совместим с V.Thru картриджами.",
+      "description": "",
       "popular": false,
-      "image": "",
+      "image": "images/devices/VooPoo/Vmate_i3-converted.webp",
       "coils": [
         "vthru-07",
         "vthru-12",
