@@ -15,21 +15,27 @@
   };
   const ABBR = { cartridge: "КАРТР.", coil: "ИСПАР.", mixed: "РАСХОД." };
 
+  const FORM_OF = new Map();
+  Object.keys(WORDS).forEach((fam) => WORDS[fam].forEach((w, i) => FORM_OF.set(w, { fam, i })));
+
   const IDX_CART = { "ами": 8, "ах": 9, "ам": 7, "ей": 6, "ом": 3, "а": 1, "у": 2, "е": 4, "и": 5 };
   const IDX_COIL = { "ями": 8, "ях": 9, "ям": 7, "ей": 6, "ем": 3, "я": 1, "ю": 2, "е": 4, "и": 5, "ь": 0 };
   const IDX_MIX = { "ами": 8, "ах": 9, "ам": 7, "ов": 6, "ом": 3, "а": 1, "у": 2, "е": 4, "и": 5 };
 
-  /* границы слова вручную: \b в JS не работает с кириллицей */
+  /* \b в JS не работает с кириллицей — границы задаём вручную */
   const NOT_LETTER = "(^|[^а-яёa-z0-9])";
   const NO_TAIL = "(?![а-яёa-z0-9])";
   const RE_CART = new RegExp(NOT_LETTER + "картридж(ами|ах|ам|ей|ом|а|у|е|и)?" + NO_TAIL, "gi");
   const RE_COIL = new RegExp(NOT_LETTER + "испарител(ями|ях|ям|ей|ем|я|ю|е|и|ь)?" + NO_TAIL, "gi");
   const RE_MIX = new RegExp(NOT_LETTER + "расходник(ами|ах|ам|ов|ом|а|у|е|и)?" + NO_TAIL, "gi");
   const RE_ABBR = new RegExp(NOT_LETTER + "(КАРТР\\.|ИСПАР\\.|РАСХОД\\.)", "gi");
+  const RE_NUM_WORD = /(\d+)([ \u00A0\t]+)([а-яё]+)/gi;
+  const RE_LEAD_WORD = /^([ \u00A0\t]*)([а-яё]+)/i;
 
   function plural(n, kind) {
     const k = WORDS[kind] ? kind : "mixed";
-    const a = Math.abs(Number(n) || 0) % 100, b = a % 10;
+    const v = Math.abs(Math.trunc(Number(n) || 0));
+    const a = v % 100, b = v % 10;
     if (a > 10 && a < 20) return WORDS[k][6];
     if (b === 1) return WORDS[k][0];
     if (b > 1 && b < 5) return WORDS[k][1];
@@ -50,16 +56,67 @@
     });
   }
 
+  /* согласование с числительным внутри одного узла */
+  function agree(text, kind) {
+    return text.replace(RE_NUM_WORD, (m, num, gap, word) => {
+      const hit = FORM_OF.get(word.toLowerCase());
+      if (!hit) return m;
+      const target = WORDS[kind] ? kind : hit.fam;
+      return num + gap + keepCase(word, plural(num, target));
+    });
+  }
+
   function convert(text, kind) {
     if (!text || !WORDS[kind]) return text;
     let s = String(text);
     const target = WORDS[kind];
-
     s = s.replace(RE_ABBR, (m, pre, ab) => pre + keepCase(ab, ABBR[kind]));
     if (kind !== "cartridge") s = swap(swap(s, RE_CART, IDX_CART, target), RE_CART, IDX_CART, target);
     if (kind !== "coil") s = swap(swap(s, RE_COIL, IDX_COIL, target), RE_COIL, IDX_COIL, target);
     if (kind !== "mixed") s = swap(swap(s, RE_MIX, IDX_MIX, target), RE_MIX, IDX_MIX, target);
-    return s;
+    return agree(s, kind);
+  }
+
+  /* число может лежать в соседнем узле: <b>4</b> испарителей */
+  function tailNumber(node) {
+    const grab = (n) => {
+      if (!n) return null;
+      const t = ((n.nodeType === 3 ? n.nodeValue : n.textContent) || "").replace(/\u00A0/g, " ").trim();
+      if (!t) return undefined;
+      const m = /(\d+)$/.exec(t);
+      return m ? Number(m[1]) : null;
+    };
+    let p = node.previousSibling, hops = 0;
+    while (p && hops < 3) {
+      const r = grab(p);
+      if (r !== undefined) return r;
+      p = p.previousSibling; hops++;
+    }
+    const par = node.parentElement;
+    if (par) {
+      const r = grab(par.previousSibling);
+      if (r !== undefined && r !== null) return r;
+      const gp = par.parentElement;
+      if (gp) {
+        const r2 = grab(gp.previousSibling);
+        if (r2 !== undefined && r2 !== null) return r2;
+      }
+    }
+    return null;
+  }
+
+  function agreeLeading(node, kind) {
+    const raw = node.nodeValue;
+    const m = RE_LEAD_WORD.exec(raw);
+    if (!m) return;
+    const hit = FORM_OF.get(m[2].toLowerCase());
+    if (!hit) return;
+    const n = tailNumber(node);
+    if (n === null) return;
+    const target = WORDS[kind] ? kind : hit.fam;
+    const repl = keepCase(m[2], plural(n, target));
+    if (repl === m[2]) return;
+    node.nodeValue = raw.slice(0, m[1].length) + repl + raw.slice(m[1].length + m[2].length);
   }
 
   /* ================= БАЗА ================= */
@@ -71,16 +128,15 @@
   let db = read() || { devices: [], coils: [] };
   let rev = 0;
   let devices = [], coils = [], byId = new Map(), textCache = new Map();
+  let itemCtx = null;
 
-  /* название серии — самый надёжный признак */
-  const COIL_NAME = /(^|[^а-яёa-z])(gtx|pnp|tpp|rpm|nrg|gt ?\d|b ?series|z ?coil|mesh|coil|испарител|atomizer|head|sub ?ohm|ceramic|кантал|mesh coil)/;
-  const CART_NAME = /(cartridge|картридж|xros series|luxe q|caliburn|novo|pod\b|мanto|manto|jellybox|pasito|ursa|orion|eco nano|veco)/;
+  const COIL_NAME = /(^|[^а-яёa-z])(gtx|pnp|tpp|rpm|nrg|gt ?\d|b ?series|z ?coil|mesh|coil|испарител|atomizer|head|sub ?ohm|ceramic|кантал)/;
+  const CART_NAME = /(cartridge|картридж|xros series|luxe q|caliburn|novo|pod\b|manto|jellybox|pasito|ursa|orion|eco nano|veco)/;
   const MOD_TYPE = /pod[ -]?mod|box|мод|kit|набор|aio|батарейн/;
 
   function coilKind(c) {
     if (c.consumableSrc === "user" && (c.consumable === "coil" || c.consumable === "cartridge")) return c.consumable;
-    const n = norm(c.name);
-    const t = norm(c.type);
+    const n = norm(c.name), t = norm(c.type);
     if (COIL_NAME.test(n) && !CART_NAME.test(n)) return "coil";
     if (CART_NAME.test(n) && !COIL_NAME.test(n)) return "cartridge";
     if (/испар|coil/.test(t)) return "coil";
@@ -102,6 +158,17 @@
     return "cartridge";
   }
 
+  function computeItemCtx() {
+    itemCtx = null;
+    if (!/item\.html/i.test(location.pathname) && !$("itemRoot")) return;
+    const p = new URLSearchParams(location.search);
+    const id = p.get("id"), type = p.get("type");
+    if (!id) return;
+    if (type === "coil") { const c = byId.get(id); itemCtx = c ? coilKind(c) : null; return; }
+    const d = db.devices.find((x) => x.id === id);
+    itemCtx = d ? deviceKind(d) : null;
+  }
+
   function rebuild() {
     db = read() || { devices: [], coils: [] };
     db.devices = Array.isArray(db.devices) ? db.devices : [];
@@ -115,6 +182,7 @@
       id: d.id, brand: d.brand || "", model: d.model || "", kind: deviceKind(d),
       keys: [norm(`${d.brand} ${d.model}`), norm(d.model)].filter(Boolean)
     }));
+    computeItemCtx();
     rev++;
     textCache.clear();
     document.querySelectorAll("[data-vh-kind]").forEach((n) => { n.removeAttribute("data-vh-kind"); n.removeAttribute("data-vh-rev"); });
@@ -141,16 +209,6 @@
   }
 
   /* ================= КОНТЕКСТ ================= */
-  const itemCtx = (() => {
-    if (!/item\.html/i.test(location.pathname) && !$("itemRoot")) return null;
-    const p = new URLSearchParams(location.search);
-    const id = p.get("id"), type = p.get("type");
-    if (!id) return null;
-    if (type === "coil") { const c = byId.get(id); return c ? coilKind(c) : null; }
-    const d = db.devices.find((x) => x.id === id);
-    return d ? deviceKind(d) : null;
-  })();
-
   function brandKind(name) {
     const list = devices.filter((d) => norm(d.brand) === norm(name));
     if (!list.length) return "mixed";
@@ -215,9 +273,11 @@
     const p = node.parentElement;
     if (!p || SKIP.test(p.tagName) || p.isContentEditable) return;
     const raw = node.nodeValue;
-    if (!raw || raw.length < 4 || !/картр|испар|расход/i.test(raw)) return;
-    const out = convert(raw, kindFor(p));
+    if (!raw || raw.length < 3 || !/картр|испар|расход/i.test(raw)) return;
+    const kind = kindFor(p);
+    const out = convert(raw, kind);
     if (out !== raw) node.nodeValue = out;
+    agreeLeading(node, kind);
   }
 
   function walk(root) {
@@ -285,6 +345,9 @@
         letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:.16s}
       .lb-auto:hover{border-color:var(--accent,#fff);color:var(--text,#f4f6f8)}
       .lb-count{font-size:11px;font-weight:700;color:var(--muted2,#6a717a)}
+      .lb-sample{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+      .lb-sample span{padding:4px 8px;border:1px solid var(--border,#2b3037);border-radius:999px;
+        font:700 10.5px/1 ui-monospace,Menlo,Consolas,monospace;color:var(--muted,#8b929b)}
       @media (max-width:560px){.lb-seg{grid-template-columns:1fr}}
     `;
     document.head.appendChild(st);
@@ -299,6 +362,8 @@
       const n = ($("coilChecks") ? $("coilChecks").querySelectorAll("input:checked") : []).length;
       c.textContent = picked ? `В тексте будет: «${n} ${plural(n, picked)}»` : "Выбери, что устанавливается в устройство";
     }
+    const s = $("lbSample");
+    if (s && picked) s.innerHTML = [1, 2, 4, 5, 11, 21].map((n) => `<span>${n} ${plural(n, picked)}</span>`).join("");
   }
 
   function currentDevice() {
@@ -344,7 +409,7 @@
     box.innerHTML = `
       <div class="lb-top">
         <span class="lb-l">Что использует устройство</span>
-        <span class="lb-hint">Влияет на слово в каталоге, карточке и тренажёре</span>
+        <span class="lb-hint">Влияет на слово и склонение в каталоге, карточке и тренажёре</span>
       </div>
       <div class="lb-seg" id="lbSeg">
         <button type="button" data-kind="cartridge" aria-pressed="false"><b>Картридж</b><span>Сменный бак целиком · XROS, Luxe Q, Novo</span></button>
@@ -353,7 +418,8 @@
       <div class="lb-foot">
         <button class="lb-auto" id="lbAuto" type="button">Определить автоматически</button>
         <span class="lb-count" id="lbCount"></span>
-      </div>`;
+      </div>
+      <div class="lb-sample" id="lbSample"></div>`;
 
     const checks = $("coilChecks");
     const anchor = checks ? (checks.closest("label") || checks.parentElement) : form.querySelector(".form-actions");
@@ -432,7 +498,7 @@
   window.VHLabels = {
     kindOf: (id) => { const d = db.devices.find((x) => x.id === id); return d ? deviceKind(d) : null; },
     word: (n, kind) => `${n} ${plural(n, kind)}`,
-    plural, convert, rebuild: onDb,
+    plural, convert, agree, rebuild: onDb,
     get pool() { return poolKind(); }
   };
 })();
