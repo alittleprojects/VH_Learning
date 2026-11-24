@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:35:20.026Z",
+    "updatedAt": "2026-11-24T18:35:29.180Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -985,6 +985,21 @@ window.CATALOG_DATA = {
       "coils": [
         "pnp-x-015",
         "pnp-x-03"
+      ]
+    },
+    {
+      "id": "dev-1795545324419-9e2f2",
+      "brand": "VOOPOO",
+      "model": "Vmate Max 2",
+      "type": "Pod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/VooPoo/Vmate_max_2.webp",
+      "coils": [
+        "coil-1795029965989-611b2",
+        "vthru-07",
+        "vthru-12"
       ]
     }
   ]
