@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:20:46.002Z",
+    "updatedAt": "2026-11-24T18:20:57.939Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -882,6 +882,17 @@ window.CATALOG_DATA = {
       "coils": [
         "plonq-cart"
       ]
+    },
+    {
+      "id": "dev-1795544455781-0335b",
+      "brand": "GeekVape",
+      "model": "Aegis Nano 3",
+      "type": "Pod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/GeekVape/aegis_nano3-converted.webp",
+      "coils": []
     }
   ]
 };
