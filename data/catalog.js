@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:33:14.515Z",
+    "updatedAt": "2026-11-24T18:33:43.540Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -972,6 +972,20 @@ window.CATALOG_DATA = {
       "popular": false,
       "image": "images/devices/VooPoo/argus_a-converted.webp",
       "coils": []
+    },
+    {
+      "id": "dev-1795545221415-981a2",
+      "brand": "VOOPOO",
+      "model": "Argus Pro 2",
+      "type": "Pod-Mod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/VooPoo/argus_pro2.webp",
+      "coils": [
+        "pnp-x-015",
+        "pnp-x-03"
+      ]
     }
   ]
 };
