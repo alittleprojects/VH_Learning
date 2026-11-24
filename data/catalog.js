@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:32:14.443Z",
+    "updatedAt": "2026-11-24T18:32:38.896Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -961,6 +961,17 @@ window.CATALOG_DATA = {
         "pnp-x-015",
         "pnp-x-03"
       ]
+    },
+    {
+      "id": "dev-1795545156715-c86a6",
+      "brand": "VOOPOO",
+      "model": "Argus A",
+      "type": "Pod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/VooPoo/argus_a-converted.webp",
+      "coils": []
     }
   ]
 };
