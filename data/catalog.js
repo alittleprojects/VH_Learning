@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:42:56.547Z",
+    "updatedAt": "2026-11-24T18:44:19.925Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -1022,6 +1022,17 @@ window.CATALOG_DATA = {
       "description": "",
       "popular": false,
       "image": "images/devices/Smoant/knight_aio-converted.webp",
+      "coils": []
+    },
+    {
+      "id": "dev-1795545855397-d8c00",
+      "brand": "Smoant",
+      "model": "Pasito III",
+      "type": "Pod-Mod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/Smoant/pasito_3-converted.webp",
       "coils": []
     }
   ]
