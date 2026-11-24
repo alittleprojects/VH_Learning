@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:27:24.763Z",
+    "updatedAt": "2026-11-24T18:28:10.989Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -904,6 +904,20 @@ window.CATALOG_DATA = {
       "popular": false,
       "image": "images/devices/GeekVape/soul2.webp",
       "coils": []
+    },
+    {
+      "id": "dev-1795544888595-f7af1",
+      "brand": "VOOPOO",
+      "model": "Vmate E",
+      "type": "Pod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/VooPoo/vmate_e-converted.webp",
+      "coils": [
+        "vthru-07",
+        "vthru-12"
+      ]
     }
   ]
 };
