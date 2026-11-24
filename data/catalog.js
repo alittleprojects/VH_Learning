@@ -1,7 +1,7 @@
 window.CATALOG_DATA = {
   "meta": {
     "title": "VapeAcademy Catalog",
-    "updatedAt": "2026-11-24T18:21:50.456Z",
+    "updatedAt": "2026-11-24T18:22:21.203Z",
     "note": "Демо-база. Проверьте совместимость и цены под ваш ассортимент."
   },
   "coils": [
@@ -892,6 +892,17 @@ window.CATALOG_DATA = {
       "description": "",
       "popular": false,
       "image": "images/devices/GeekVape/aegis_nano3-converted.webp",
+      "coils": []
+    },
+    {
+      "id": "dev-1795544539092-a7755",
+      "brand": "GeekVape",
+      "model": "Soul 2",
+      "type": "Pod",
+      "price": 0,
+      "description": "",
+      "popular": false,
+      "image": "images/devices/GeekVape/soul2.webp",
       "coils": []
     }
   ]
